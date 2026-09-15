@@ -1,3 +1,8 @@
+<p align="center">
+  <img src="plugins/appsec-skills/wiki/docs/assets/appsec-untangled-logo.png"
+       alt="AppSec Untangled" width="120">
+</p>
+
 # AppSec Untangled Resources
 
 Security code review resources from the
