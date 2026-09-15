@@ -1,0 +1,13 @@
+/* AppSec Untangled brand navy, taken from the logo background */
+:root {
+  --md-primary-fg-color:        #122337;
+  --md-primary-fg-color--light: #1c3350;
+  --md-primary-fg-color--dark:  #0c1826;
+  --md-primary-bg-color:        #ffffff;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color:        #122337;
+  --md-primary-fg-color--light: #1c3350;
+  --md-primary-fg-color--dark:  #0c1826;
+}

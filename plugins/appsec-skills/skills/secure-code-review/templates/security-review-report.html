@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Security review: PR #128</title>
+<!-- Generated from security-review-report.md by skill/scripts/render-report-html.mjs -->
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --panel: #ffffff;
+    --text: #1f2328;
+    --muted: #59636e;
+    --border: #d1d9e0;
+    --code-bg: #f6f8fa;
+    --link: #0969da;
+    --ok: #1a7f37;
+    --ok-bg: #dafbe1;
+    --warn: #9a6700;
+    --warn-bg: #fff8c5;
+    --bad: #cf222e;
+    --bad-bg: #ffebe9;
+    --info: #57606a;
+    --info-bg: #eaeef2;
+    --logic: #1f6feb;
+    --logic-bg: #ddf4ff;
+    --inject: #cf222e;
+    --inject-bg: #ffebe9;
+    --add-bg: #e6ffec;
+    --del-bg: #ffebe9;
+    --lane-browser: #ddf4ff;
+    --lane-network: #fff8c5;
+    --lane-backend: #dafbe1;
+    --lane-db: #fbefff;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117;
+      --panel: #151b23;
+      --text: #e6edf3;
+      --muted: #9198a1;
+      --border: #3d444d;
+      --code-bg: #0d1117;
+      --link: #4493f8;
+      --ok: #3fb950;
+      --ok-bg: rgba(46, 160, 67, 0.15);
+      --warn: #d29922;
+      --warn-bg: rgba(187, 128, 9, 0.15);
+      --bad: #f85149;
+      --bad-bg: rgba(248, 81, 73, 0.15);
+      --info: #9198a1;
+      --info-bg: rgba(145, 152, 161, 0.15);
+      --logic: #4493f8;
+      --logic-bg: rgba(56, 139, 253, 0.15);
+      --inject: #f85149;
+      --inject-bg: rgba(248, 81, 73, 0.15);
+      --add-bg: rgba(46, 160, 67, 0.15);
+      --del-bg: rgba(248, 81, 73, 0.15);
+      --lane-browser: rgba(56, 139, 253, 0.12);
+      --lane-network: rgba(187, 128, 9, 0.12);
+      --lane-backend: rgba(46, 160, 67, 0.12);
+      --lane-db: rgba(163, 113, 247, 0.12);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 0 16px;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  code, pre { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+  :not(pre) > code {
+    padding: 0.1em 0.35em;
+    border-radius: 6px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    font-size: 0.88em;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 32px;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 32px 0 64px;
+  }
+
+  /* Table of contents */
+  nav.toc {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    font-size: 14px;
+  }
+  nav.toc .toc-title { margin-bottom: 8px; color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  nav.toc ol { margin: 0; padding: 0; list-style: none; }
+  nav.toc li { margin: 2px 0; }
+  nav.toc a { display: block; padding: 4px 8px; border-radius: 6px; color: var(--text); }
+  nav.toc a:hover { background: var(--panel); text-decoration: none; }
+  nav.toc .sub a { padding-left: 22px; color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    nav.toc { position: static; }
+  }
+
+  header.report {
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--panel);
+  }
+  header.report h1 { margin: 0 0 4px; font-size: 26px; line-height: 1.25; }
+  header.report .subtitle { margin: 0 0 16px; color: var(--muted); }
+
+  .meta { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; font-size: 14px; }
+  .meta dt { color: var(--muted); }
+  .meta dd { margin: 0; }
+
+  section { margin-top: 28px; }
+  h2 { margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); font-size: 21px; }
+  h3 { margin: 20px 0 8px; font-size: 16px; }
+
+  .panel {
+    padding: 18px 20px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--panel);
+  }
+
+  /* Summary */
+  .verdict { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font-size: 18px; font-weight: 700; }
+  .counts { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+  .count { min-width: 120px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; }
+  .count b { display: block; font-size: 22px; line-height: 1.1; }
+  .count span { color: var(--muted); font-size: 13px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .table-wrap { overflow-x: auto; }
+
+  /* Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 9px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge.ok { background: var(--ok-bg); color: var(--ok); }
+  .badge.warn { background: var(--warn-bg); color: var(--warn); }
+  .badge.bad { background: var(--bad-bg); color: var(--bad); }
+  .badge.info { background: var(--info-bg); color: var(--info); }
+  .badge.logic { background: var(--logic-bg); color: var(--logic); }
+  .badge.inject { background: var(--inject-bg); color: var(--inject); }
+
+  .legend { margin-top: 10px; color: var(--muted); font-size: 13px; }
+  .legend .badge { margin-right: 4px; }
+
+  /* Story swim lanes */
+  .lanes { display: grid; grid-template-columns: 38px minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1.7fr) minmax(0, 0.7fr); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; font-size: 13.5px; }
+  .lanes .lane-head { padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+  .lanes .lane-head.browser, .lanes .cell.browser { background: var(--lane-browser); }
+  .lanes .lane-head.network, .lanes .cell.network { background: var(--lane-network); }
+  .lanes .lane-head.backend, .lanes .cell.backend { background: var(--lane-backend); }
+  .lanes .lane-head.db, .lanes .cell.db { background: var(--lane-db); }
+  .lanes .cell { min-height: 38px; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  .lanes .num { display: flex; align-items: flex-start; justify-content: center; padding-top: 8px; border-bottom: 1px solid var(--border); color: var(--muted); font-weight: 700; }
+  .lanes .step { padding: 6px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); }
+  .lanes .step small { display: block; color: var(--muted); }
+  .lanes .step .check { color: var(--bad); font-weight: 600; }
+/* Code attached to a swim-lane step: file path header, then the lines, then the link */
+.lanes .lane-code { margin-top: 6px; }
+.lanes .lane-code pre.code { margin: 0; padding: 8px 0; font-size: 11.5px; line-height: 1.45; border-radius: 6px; }
+.lanes .lane-code pre.code { overflow: visible; }
+.lanes .lane-code pre.code .l { padding-right: 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+/* Hover shows the snippet at its natural width, drawn over the neighbouring lanes.
+   The columns are sized by the grid, so nothing reflows underneath it. */
+.lanes .cell { position: relative; }
+.lanes .lane-code pre.code { transition: box-shadow 120ms ease; }
+.lanes .lane-code:hover pre.code { position: relative; z-index: 7; width: max-content; max-width: 620px; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28); }
+.lanes .lane-code:hover pre.code .l { white-space: pre; overflow-wrap: normal; }
+.lanes .cell.db .lane-code:hover pre.code, .lanes .cell.backend .lane-code:hover pre.code { float: right; }
+.lanes .lane-code pre.code .l .n { width: 24px; margin-right: 8px; padding-right: 4px; }
+.lanes .lane-code pre.code .file { margin: -8px 0 6px; padding: 5px 10px; font-size: 11px; font-weight: 600; }
+.lanes .lane-code .code-link { display: block; margin-top: 4px; font-size: 11px; color: var(--muted); text-decoration: none; }
+.lanes .lane-code .code-link:hover { text-decoration: underline; }
+
+  /* Code */
+  pre.code {
+    overflow-x: auto;
+    margin: 10px 0 4px;
+    padding: 10px 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--code-bg);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  pre.code .l { display: block; padding: 0 14px 0 0; white-space: pre; }
+  pre.code .l .n { display: inline-block; width: 42px; margin-right: 12px; padding-right: 8px; color: var(--muted); text-align: right; user-select: none; }
+  pre.code .l.hl { background: var(--warn-bg); box-shadow: inset 3px 0 0 var(--warn); }
+  pre.code .l.add { background: var(--add-bg); }
+  pre.code .l.del { background: var(--del-bg); }
+  pre.code .file { display: block; margin: -10px 0 8px; padding: 6px 14px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+  .source-link { font-size: 13px; }
+
+  /* Syntax highlighting: token classes are added by the inline script at the end of this file */
+  :root { --tk-k: #cf222e; --tk-s: #0a3069; --tk-c: #6e7781; --tk-n: #0550ae; --tk-f: #8250df; --tk-t: #953800; --tk-a: #116329; --tk-v: #953800; }
+  @media (prefers-color-scheme: dark) {
+    :root { --tk-k: #ff7b72; --tk-s: #a5d6ff; --tk-c: #8b949e; --tk-n: #79c0ff; --tk-f: #d2a8ff; --tk-t: #ffa657; --tk-a: #7ee787; --tk-v: #ffa657; }
+  }
+  pre.code .tk-k { color: var(--tk-k); }
+  pre.code .tk-s { color: var(--tk-s); }
+  pre.code .tk-c { color: var(--tk-c); font-style: italic; }
+  pre.code .tk-n { color: var(--tk-n); }
+  pre.code .tk-f { color: var(--tk-f); }
+  pre.code .tk-t { color: var(--tk-t); }
+  pre.code .tk-a { color: var(--tk-a); }
+  pre.code .tk-v { color: var(--tk-v); }
+  pre.code .l .mk { display: inline-block; width: 1.2em; color: var(--muted); user-select: none; }
+
+  /* Threat cards */
+  .threat { margin-top: 16px; padding: 16px 18px; border: 1px solid var(--border); border-left-width: 4px; border-radius: 10px; background: var(--panel); scroll-margin-top: 16px; }
+  .threat.ok { border-left-color: var(--ok); }
+  .threat.warn { border-left-color: var(--warn); }
+  .threat.bad { border-left-color: var(--bad); }
+  .threat-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .threat-head h3 { margin: 0; }
+  .threat .where { margin: 6px 0 8px; color: var(--muted); font-size: 13.5px; }
+  .threat h4.sub { display: inline-flex; align-items: center; gap: 6px; margin: 16px 0 8px; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+  .threat h4.sub-exploit { color: var(--bad); background: var(--del-bg); }
+  .threat h4.sub-fix { color: var(--ok); background: var(--add-bg); }
+  .justification { margin: 8px 0; }
+  .justification b { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  details { margin-top: 10px; border: 1px solid var(--border); border-radius: 8px; }
+  details > summary { padding: 8px 12px; cursor: pointer; font-weight: 600; font-size: 14px; }
+  details[open] > summary { border-bottom: 1px solid var(--border); }
+  details .details-body { padding: 4px 14px 12px; font-size: 14px; }
+  details .details-body h4 { margin: 12px 0 4px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  details .details-body ul, details .details-body ol { margin: 4px 0; padding-left: 20px; }
+
+  .kv { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 6px 0; font-size: 13.5px; }
+  .kv span b { color: var(--muted); font-weight: 600; }
+
+  .callout { margin: 10px 0; padding: 10px 12px; border-radius: 8px; background: var(--info-bg); font-size: 14px; }
+  .callout.warn { background: var(--warn-bg); }
+
+  footer { margin-top: 36px; color: var(--muted); font-size: 13px; }
+</style>
+<style>
+  .lanes .step small.check { color: var(--bad); }
+  p.source-link { margin: 0 0 4px; }
+  article.threat > ul, article.threat > ol { margin: 6px 0; }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Report sections"><div class="toc-title">Security review</div><ol>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#scope">1. Scope and architecture</a></li>
+<li><a href="#entry-points">2. Entry points</a></li>
+<li><a href="#sinks">3. Dangerous sinks</a></li>
+<li><a href="#threat-model">4. Threat model</a></li>
+<li><a href="#mitigations">5. Mitigation analysis</a></li>
+<li class="sub"><a href="#t1">T1 Missing authentication</a></li>
+<li class="sub"><a href="#t2">T2 Missing authorization (IDOR)</a></li>
+<li class="sub"><a href="#t3">T3 Missing CSRF protection</a></li>
+<li class="sub"><a href="#t4">T4 Cross-site scripting (XSS)</a></li>
+<li class="sub"><a href="#t5">T5 SQL injection</a></li>
+<li><a href="#action-items">6. Action items</a></li>
+</ol></nav>
+<main>
+<header class="report">
+  <h1>🔐 Security review: PR #128</h1>
+  <p class="subtitle">Add button to edit a task's description</p>
+  <dl class="meta"><dt>Repository</dt><dd><a href="https://github.com/example-org/todo-app">example-org/todo-app</a></dd><dt>Pull request</dt><dd><a href="https://github.com/example-org/todo-app/pull/128">#128</a> by <code>alice</code> · <code>edit-task</code> → <code>main</code></dd><dt>Commit reviewed</dt><dd><a href="https://github.com/example-org/todo-app/commit/9f3c2ab4d1e8"><code>9f3c2ab</code></a></dd><dt>Changes</dt><dd>4 files · +32 −1</dd><dt>Reviewed</dt><dd>2026-09-14 · Claude Code security-review skill · Human verification: ☐ pending</dd></dl>
+</header>
+<section id="summary"><h2>Summary</h2><div class="panel">
+<p class="verdict">✅ Approve, with 1 hardening recommendation</p>
+<p>This PR lets users edit a task's description from the task list, through a new <code>PUT /api/tasks/:id</code> route. Authentication, the ownership check, safe rendering in the page and parameterized SQL are all in place. CSRF protection relies on browser behavior rather than an explicit control, so we recommend setting <code>SameSite</code> on the session cookie (<a href="#action-items">A1</a>).</p>
+<div class="counts"><div class="count"><b>5</b><span>threats reviewed</span></div><div class="count"><b style="color:var(--ok)">4</b><span>mitigated</span></div><div class="count"><b style="color:var(--warn)">1</b><span>partially mitigated</span></div><div class="count"><b style="color:var(--bad)">0</b><span>not mitigated</span></div><div class="count"><b style="color:var(--info)">0</b><span>needs verification</span></div></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Threat</th><th>Category</th><th>Status</th><th>Severity</th></tr></thead><tbody>
+<tr><td><a href="#t1">T1</a></td><td>Missing authentication</td><td><span class="badge logic">🔓 Business logic</span></td><td><span class="badge ok">✅ Mitigated</span></td><td>—</td></tr>
+<tr><td><a href="#t2">T2</a></td><td>Missing authorization (IDOR)</td><td><span class="badge logic">🔓 Business logic</span></td><td><span class="badge ok">✅ Mitigated</span></td><td>—</td></tr>
+<tr><td><a href="#t3">T3</a></td><td>Missing CSRF protection</td><td><span class="badge logic">🔓 Business logic</span></td><td><span class="badge warn">⚠️ Partially mitigated</span></td><td>Low</td></tr>
+<tr><td><a href="#t4">T4</a></td><td>Cross-site scripting (XSS)</td><td><span class="badge inject">💉 Source to sink</span></td><td><span class="badge ok">✅ Mitigated</span></td><td>—</td></tr>
+<tr><td><a href="#t5">T5</a></td><td>SQL injection</td><td><span class="badge inject">💉 Source to sink</span></td><td><span class="badge ok">✅ Mitigated</span></td><td>—</td></tr>
+</tbody></table></div>
+<p><b>Status legend:</b> <span class="badge ok">✅ Mitigated</span> · <span class="badge warn">⚠️ Partially mitigated</span> · <span class="badge bad">❌ Not mitigated</span> · <span class="badge info">❓ Needs verification</span></p>
+</div></section>
+<section id="scope"><h2>1. 🗺️ Scope and architecture</h2>
+<h3>Goal of the PR</h3>
+<p>Users can currently add and complete tasks but not change their text. This PR adds an <b>Edit</b> button next to each task. Clicking it asks for a new description, saves it, and updates the page without a reload.</p>
+<h3>What changed</h3>
+<div class="table-wrap"><table><thead><tr><th>File</th><th>Change</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/public/index.html#L13"><code>public/index.html</code></a></td><td>+1</td><td>Adds the Edit button to each task</td></tr>
+<tr><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L23-L34"><code>public/tasks.js</code></a></td><td>+12</td><td><code>editTask()</code>: prompts, sends the request, updates the page</td></tr>
+<tr><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/routes/tasks.js#L31-L39"><code>routes/tasks.js</code></a></td><td>+10</td><td>New <code>PUT /api/tasks/:id</code> route with an ownership check</td></tr>
+<tr><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/store/taskStore.js#L18-L26"><code>store/taskStore.js</code></a></td><td>+9 −1</td><td>New <code>update()</code> function and export</td></tr>
+</tbody></table></div>
+<p><b>Relevant code outside the diff:</b> <a href="https://github.com/example-org/todo-app/blob/9f3c2ab/app.js#L1-L11"><code>app.js</code></a>, where sessions and <code>requireAuth</code> are set up, and <code>store.get()</code>.</p>
+<p><b>Tech stack:</b> Node.js with Express and <code>express-session</code>, PostgreSQL through <code>pg</code>, plain JavaScript in the browser.</p>
+<p><b>Roles:</b> the task owner (logged in), other logged-in users, anonymous visitors.</p>
+<h3>The story: what happens when a user clicks Edit</h3>
+<p>Each step says what happens; the code it happens in is attached to the step.</p>
+<div class="table-wrap"><div class="lanes" role="table" aria-label="Request flow"><div class="lane-head"></div><div class="lane-head browser">🖥️ Browser / client</div><div class="lane-head network">🌐 Network</div><div class="lane-head backend">⚙️ Backend</div><div class="lane-head db">🗄️ Database</div>
+<div class="num">1</div><div class="cell browser"><div class="step">Clicks Edit and types a new description<small>Browser · public/tasks.js</small></div><div class="lane-code"><pre class="code" data-lang="html"><span class="file">public/index.html</span><span class="l"><span class="n">13</span>&lt;button onclick="editTask(42)"&gt;Edit&lt;/button&gt;</span></pre><a class="code-link" href="https://github.com/example-org/todo-app/blob/9f3c2ab/public/index.html#L13">🔗 <code>public/index.html#L13</code></a></div></div><div class="cell network"></div><div class="cell backend"></div><div class="cell db"></div>
+<div class="num">2</div><div class="cell browser"></div><div class="cell network"><div class="step">Sends the update request, with the session cookie attached<small>Browser · public/tasks.js → Backend · app.js</small></div><div class="lane-code"><pre class="code" data-lang="http"><span class="file">HTTP request</span><span class="l">PUT /api/tasks/42 HTTP/1.1</span><span class="l">Host: todo.example.com</span><span class="l">Cookie: connect.sid=s%3AkF9x...</span><span class="l">Content-Type: application/json</span><span class="l"> </span><span class="l">{"description": "Buy oat milk"}</span></pre></div></div><div class="cell backend"></div><div class="cell db"></div>
+<div class="num">3</div><div class="cell browser"></div><div class="cell network"></div><div class="cell backend"><div class="step">Refuses the request unless the session identifies a user<small>Backend · app.js</small></div><div class="lane-code"><pre class="code" data-lang="js"><span class="file">app.js</span><span class="l"><span class="n">5</span>function requireAuth(req, res, next) {</span><span class="l"><span class="n">6</span>  if (!req.session.userId) return res.sendStatus(401)</span><span class="l"><span class="n">7</span>  next()</span><span class="l"><span class="n">8</span>}</span><span class="l"><span class="n">11</span>app.use('/api/tasks', requireAuth, tasksRouter)</span></pre><a class="code-link" href="https://github.com/example-org/todo-app/blob/9f3c2ab/app.js#L5-L11">🔗 <code>app.js#L5-L11</code></a></div></div><div class="cell db"></div>
+<div class="num">4</div><div class="cell browser"></div><div class="cell network"></div><div class="cell backend"><div class="step">Hands off to the task update handler<small>Backend · routes/tasks.js</small></div></div><div class="cell db"></div>
+<div class="num">5</div><div class="cell browser"></div><div class="cell network"></div><div class="cell backend"><div class="step">Asks for the task named in the URL<small>Backend · store/taskStore.js</small></div><div class="lane-code"><pre class="code" data-lang="js"><span class="file">store/taskStore.js</span><span class="l"><span class="n">11</span>async function get(id) {</span><span class="l"><span class="n">12</span>  const { rows } = await db.query(</span><span class="l"><span class="n">13</span>    'SELECT * FROM tasks WHERE id = $1', [id])</span><span class="l"><span class="n">14</span>  return rows[0]</span><span class="l"><span class="n">15</span>}</span></pre><a class="code-link" href="https://github.com/example-org/todo-app/blob/9f3c2ab/store/taskStore.js#L11-L15">🔗 <code>store/taskStore.js#L11-L15</code></a></div></div><div class="cell db"></div>
+<div class="num">6</div><div class="cell browser"></div><div class="cell network"></div><div class="cell backend"></div><div class="cell db"><div class="step">Reads that task row<small>PostgreSQL</small></div></div>
+<div class="num">7</div><div class="cell browser"></div><div class="cell network"></div><div class="cell backend"><div class="step">Compares the task's owner with the logged-in user<small>Backend · routes/tasks.js</small></div><div class="lane-code"><pre class="code" data-lang="js"><span class="file">routes/tasks.js</span><span class="l"><span class="n">32</span>  const task = await store.get(req.params.id)</span><span class="l"><span class="n">33</span>  if (task?.owner_id !== req.session.userId) {</span><span class="l"><span class="n">34</span>    return res.sendStatus(404)</span><span class="l"><span class="n">35</span>  }</span></pre><a class="code-link" href="https://github.com/example-org/todo-app/blob/9f3c2ab/routes/tasks.js#L32-L35">🔗 <code>routes/tasks.js#L32-L35</code></a></div></div><div class="cell db"></div>
+<div class="num">8</div><div class="cell browser"></div><div class="cell network"></div><div class="cell backend"><div class="step">Passes the new description to the store<small>Backend · store/taskStore.js</small></div><div class="lane-code"><pre class="code" data-lang="js"><span class="file">store/taskStore.js</span><span class="l"><span class="n">19</span>  const { rows } = await db.query(</span><span class="l"><span class="n">20</span>    `UPDATE tasks SET description = $1</span><span class="l"><span class="n">21</span>     WHERE id = $2 RETURNING *`,</span><span class="l"><span class="n">22</span>    [description, id])</span></pre><a class="code-link" href="https://github.com/example-org/todo-app/blob/9f3c2ab/store/taskStore.js#L19-L22">🔗 <code>store/taskStore.js#L19-L22</code></a></div></div><div class="cell db"></div>
+<div class="num">9</div><div class="cell browser"></div><div class="cell network"></div><div class="cell backend"></div><div class="cell db"><div class="step">Writes the new description<small>PostgreSQL</small></div></div>
+<div class="num">10</div><div class="cell browser"></div><div class="cell network"></div><div class="cell backend"></div><div class="cell db"><div class="step">Returns the updated row<small>Backend · routes/tasks.js</small></div></div>
+<div class="num">11</div><div class="cell browser"></div><div class="cell network"><div class="step">Returns the updated task as JSON<small>Backend · routes/tasks.js → Browser · public/tasks.js</small></div><div class="lane-code"><pre class="code" data-lang="http"><span class="file">HTTP response</span><span class="l">HTTP/1.1 200 OK</span><span class="l">Content-Type: application/json</span><span class="l"> </span><span class="l">{"id": 42, "owner_id": 7, "description": "Buy oat milk"}</span></pre></div></div><div class="cell backend"></div><div class="cell db"></div>
+<div class="num">12</div><div class="cell browser"><div class="step">Replaces the text shown on the page<small>Browser · public/tasks.js</small></div><div class="lane-code"><pre class="code" data-lang="js"><span class="file">public/tasks.js</span><span class="l"><span class="n">33</span>  document.getElementById(`desc-${id}`).textContent = task.description</span></pre><a class="code-link" href="https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L33">🔗 <code>public/tasks.js#L33</code></a></div></div><div class="cell network"></div><div class="cell backend"></div><div class="cell db"></div>
+</div></div>
+<h3>Assumptions and out of scope</h3>
+<ul><li>No CORS middleware is configured, so the API accepts only same-origin browser requests.</li><li>Creating, completing and deleting tasks are unchanged and out of scope.</li></ul>
+</section>
+<section id="entry-points"><h2>2. 🚪 Entry points</h2>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Entry point</th><th>Authentication</th><th>Action performed</th><th>Sensitivity</th><th>Location</th></tr></thead><tbody>
+<tr><td>EP1</td><td><code>PUT /api/tasks/:id</code></td><td>Session cookie</td><td>Rewrites one task's description</td><td>Medium — private user content, single record, reversible</td><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/routes/tasks.js#L31"><code>routes/tasks.js#L31</code></a></td></tr>
+</tbody></table></div>
+<h3>EP1 · <code>PUT /api/tasks/:id</code></h3>
+<div class="table-wrap"><table><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td><b>Action performed</b></td><td>Replaces the description text of one existing task</td></tr>
+<tr><td><b>Inputs</b></td><td><code>id</code> (URL path, integer) · <code>description</code> (JSON body, string, no length limit)</td></tr>
+<tr><td><b>Outputs</b></td><td>The updated task: <code>id</code>, <code>owner_id</code>, <code>description</code></td></tr>
+<tr><td><b>Data sensitivity</b></td><td>Task text is private user content. No PII, credentials or payment data. <code>owner_id</code> is returned, which discloses an internal user ID to its owner only</td></tr>
+<tr><td><b>Action sensitivity</b></td><td>Write to a single record, reversible by the owner. Not financial, not destructive, no side effects outside the row</td></tr>
+<tr><td><b>Authentication</b></td><td>Session cookie, enforced by <code>requireAuth</code> on the router mount</td></tr>
+<tr><td><b>Authorization model</b></td><td>Per-record ownership: <code>tasks.owner_id</code> must equal the session user. This app has no tenants, organizations, groups, roles, permissions or feature flags — ownership is the only dimension</td></tr>
+<tr><td><b>Location</b></td><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/routes/tasks.js#L31-L39"><code>routes/tasks.js#L31-L39</code></a></td></tr>
+</tbody></table></div>
+<p><b>Who should be able to do this</b></p>
+<ul><li>✅ The task's owner, in an authenticated session started by them.</li><li>❌ Any other logged-in user, whether or not they know the task ID.</li><li>❌ Anonymous callers.</li><li>❌ Another origin acting through the victim's browser and cookie, even with the owner logged in.</li><li>❌ Nobody can change <code>owner_id</code> through this route; ownership transfer is not a feature of this app.</li></ul>
+<p>The Edit button and <code>prompt()</code> in the browser collect the description, but the server can't trust them: any client can call EP1 directly.</p>
+</section>
+<section id="sinks"><h2>3. 🎯 Dangerous sinks</h2>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Sink</th><th>Type</th><th>Reached by</th><th>Location</th></tr></thead><tbody>
+<tr><td>SK1</td><td><code>db.query(UPDATE …)</code></td><td>SQL query</td><td><code>description</code>, <code>id</code></td><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/store/taskStore.js#L19-L22"><code>store/taskStore.js#L19-L22</code></a></td></tr>
+<tr><td>SK2</td><td><code>.textContent = …</code></td><td>Page update (DOM)</td><td><code>description</code> (from the response)</td><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L33"><code>public/tasks.js#L33</code></a></td></tr>
+</tbody></table></div>
+</section>
+<section id="threat-model"><h2>4. 🧩 Threat model</h2>
+<h3><span class="badge logic">🔓 Business logic</span>: controls that should be there, checked at every entry point</h3>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Entry point</th><th>Threat</th><th>Expected mitigation</th><th>Status</th></tr></thead><tbody>
+<tr><td><a href="#t1">T1</a></td><td>EP1</td><td>Missing authentication</td><td>A logged-in session is required</td><td><span class="badge ok">✅ Mitigated</span></td></tr>
+<tr><td><a href="#t2">T2</a></td><td>EP1</td><td>Missing authorization (IDOR)</td><td>Only the task's owner can edit it</td><td><span class="badge ok">✅ Mitigated</span></td></tr>
+<tr><td><a href="#t3">T3</a></td><td>EP1</td><td>Missing CSRF protection</td><td>Cross-site requests can't change data</td><td><span class="badge warn">⚠️ Partial</span></td></tr>
+</tbody></table></div>
+<h3><span class="badge inject">💉 Source to sink</span>: input that shouldn't reach a sink, checked at every sink</h3>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Sink</th><th>Threat</th><th>Expected mitigation</th><th>Status</th></tr></thead><tbody>
+<tr><td><a href="#t4">T4</a></td><td>SK2</td><td>Cross-site scripting (XSS)</td><td>The description is inserted as text, not HTML</td><td><span class="badge ok">✅ Mitigated</span></td></tr>
+<tr><td><a href="#t5">T5</a></td><td>SK1</td><td>SQL injection</td><td>The query uses parameters</td><td><span class="badge ok">✅ Mitigated</span></td></tr>
+</tbody></table></div>
+</section>
+<section id="mitigations"><h2>5. 🔍 Mitigation analysis</h2>
+<article class="threat ok" id="t1"><div class="threat-head"><h3>T1 · Missing authentication</h3><span class="badge ok">✅ Mitigated</span></div>
+<p class="where"><b>Category:</b> <span class="badge logic">🔓 Business logic</span> · <b>Entry point:</b> EP1</p>
+<p class="justification"><b>Justification</b><br />All <code>/api/tasks</code> routes are mounted behind <code>requireAuth</code>, which returns <code>401</code> when there's no session, so the new route can't be reached anonymously.</p>
+<pre class="code" data-lang="js"><span class="file">app.js (unchanged by this PR)</span><span class="l"><span class="n">5</span>function requireAuth(req, res, next) {</span><span class="l"><span class="n">6</span>  if (!req.session.userId) {</span><span class="l"><span class="n">7</span>    return res.sendStatus(401)</span><span class="l"><span class="n">8</span>  }</span><span class="l"><span class="n">9</span>  next()</span><span class="l"><span class="n">10</span>}</span><span class="l"><span class="n">11</span>app.use('/api/tasks', requireAuth, tasksRouter)</span></pre>
+<p class="source-link">🔗 <a href="https://github.com/example-org/todo-app/blob/9f3c2ab/app.js#L5-L11"><code>app.js#L5-L11</code></a></p>
+<details><summary>Detailed analysis, repro steps and evidence</summary><div class="details-body">
+<h4>Trace</h4><p>EP1 → <code>app.js</code> L11 mounts <code>tasksRouter</code> behind <code>requireAuth</code> → L6 checks <code>req.session.userId</code> → the handler at <code>routes/tasks.js</code> L31 only runs after <code>next()</code>.</p>
+<h4>Checked</h4>
+<ul><li><code>requireAuth</code> runs before the router, because middleware runs in the order it's registered.</li><li>No other code mounts <code>tasksRouter</code> or defines <code>/api/tasks</code> routes without <code>requireAuth</code>.</li></ul>
+<h4>Repro (confirms the control)</h4>
+<pre class="code" data-lang="bash"><span class="l">curl -i -X PUT https://todo.example.com/api/tasks/42 \</span><span class="l">  -H 'Content-Type: application/json' \</span><span class="l">  -d '{"description": "no session"}'</span></pre>
+<h4>Evidence</h4>
+<pre class="code" data-lang="http"><span class="l">HTTP/1.1 401 Unauthorized</span></pre>
+</div></details>
+</article>
+<article class="threat ok" id="t2"><div class="threat-head"><h3>T2 · Missing authorization (IDOR)</h3><span class="badge ok">✅ Mitigated</span></div>
+<p class="where"><b>Category:</b> <span class="badge logic">🔓 Business logic</span> · <b>Entry point:</b> EP1</p>
+<p class="justification"><b>Justification</b><br />The handler loads the task and returns <code>404</code> unless its <code>owner_id</code> matches the logged-in user, before calling <code>store.update()</code>.</p>
+<pre class="code" data-lang="js"><span class="file">routes/tasks.js</span><span class="l"><span class="n">31</span>router.put('/:id', async (req, res) =&gt; {</span><span class="l"><span class="n">32</span>  const task = await store.get(req.params.id)</span><span class="l"><span class="n">33</span>  if (task?.owner_id !== req.session.userId) {</span><span class="l"><span class="n">34</span>    return res.sendStatus(404)</span><span class="l"><span class="n">35</span>  }</span><span class="l"><span class="n">36</span>  const updated = await store.update(</span><span class="l"><span class="n">37</span>    task.id, req.body.description)</span><span class="l"><span class="n">38</span>  res.json(updated)</span><span class="l"><span class="n">39</span>})</span></pre>
+<p class="source-link">🔗 <a href="https://github.com/example-org/todo-app/blob/9f3c2ab/routes/tasks.js#L31-L39"><code>routes/tasks.js#L31-L39</code></a></p>
+<details><summary>Detailed analysis, repro steps and evidence</summary><div class="details-body">
+<h4>Trace</h4><p>EP1 → <code>store.get(req.params.id)</code> → ownership check at L33 → <code>store.update()</code> at L36 uses the loaded <code>task.id</code>, not the raw URL value.</p>
+<h4>Checked</h4>
+<ul><li>A missing task and someone else's task both return <code>404</code>, so the response doesn't reveal which task IDs exist.</li><li><code>task?.owner_id</code> handles a missing task without throwing.</li><li><code>owner_id</code> and <code>session.userId</code> are both numbers, so the strict <code>!==</code> comparison behaves as intended.</li></ul>
+<h4>Repro (confirms the control)</h4>
+<ol><li>Log in as <code>bob</code> (user 8).</li><li>Send a request for task 42, which belongs to <code>alice</code> (user 7):</li></ol>
+<pre class="code" data-lang="bash"><span class="l">curl -i -X PUT https://todo.example.com/api/tasks/42 \</span><span class="l">  -H 'Cookie: connect.sid=&lt;bob session&gt;' \</span><span class="l">  -H 'Content-Type: application/json' \</span><span class="l">  -d '{"description": "edited by bob"}'</span></pre>
+<h4>Evidence</h4>
+<pre class="code" data-lang="http"><span class="l">HTTP/1.1 404 Not Found</span></pre>
+<p>Task 42's description is unchanged in the database.</p>
+</div></details>
+</article>
+<article class="threat warn" id="t3"><div class="threat-head"><h3>T3 · Missing CSRF protection</h3><span class="badge warn">⚠️ Partially mitigated</span><span class="badge info">Severity: Low</span></div>
+<p class="where"><b>Category:</b> <span class="badge logic">🔓 Business logic</span> · <b>Entry point:</b> EP1</p>
+<p class="justification"><b>Justification</b><br />There's no CSRF token and the session cookie has no <code>SameSite</code> attribute. Cross-site requests are blocked today only because a <code>PUT</code> with a JSON body triggers a CORS preflight that the server doesn't approve. That protection disappears if the route ever accepts <code>POST</code> or form bodies, or if CORS is enabled with credentials.</p>
+<pre class="code" data-lang="js"><span class="file">app.js (unchanged by this PR)</span><span class="l"><span class="n">4</span>app.use(session({ secret: SECRET }))</span></pre>
+<p class="source-link">🔗 <a href="https://github.com/example-org/todo-app/blob/9f3c2ab/app.js#L4"><code>app.js#L4</code></a></p>
+<h4 class="sub sub-exploit">💥 Exploitability</h4>
+<p>Not exploitable as the code stands. An attacker would need the victim to be logged in and to visit a page they control, and would need the route to accept a request the browser sends cross-site — today it doesn't, because a <code>PUT</code> with a JSON body is preflighted and the preflight is refused. No resource ID is needed to try, since the attacker can guess task IDs, and no account on the app is required.</p>
+<h4 class="sub sub-fix">🛠️ Suggested fix</h4>
+<p>Set the cookie attributes so the browser never sends the session cookie cross-site, rather than relying on the preflight.</p>
+<pre class="code" data-lang="diff"><span class="l del"><span class="mk">-</span> app.use(session({ secret: SECRET }))</span><span class="l add"><span class="mk">+</span> app.use(session({</span><span class="l add"><span class="mk">+</span>   secret: SECRET,</span><span class="l add"><span class="mk">+</span>   cookie: { httpOnly: true, secure: true, sameSite: 'lax' },</span><span class="l add"><span class="mk">+</span> }))</span></pre>
+<ul><li><code>secure: true</code> requires HTTPS. Behind a proxy, also set <code>app.set('trust proxy', 1)</code>.</li><li>For defense in depth, add a CSRF token check on state-changing routes.</li><li><b>Verify:</b> log in and confirm <code>Set-Cookie</code> includes <code>SameSite=Lax; Secure; HttpOnly</code>.</li></ul>
+<details><summary>Detailed analysis, repro steps and evidence</summary><div class="details-body">
+<h4>Trace</h4><p>EP1 authenticates with the <code>connect.sid</code> cookie alone → the browser attaches that cookie to any request to the site it's allowed to send, including requests started by another site.</p>
+<h4>Checked</h4>
+<ul><li>No CSRF middleware or token check anywhere in the request path.</li><li>Session cookie options are the defaults: no <code>SameSite</code>, no <code>Secure</code>.</li><li>No CORS middleware, so preflight requests don't get <code>Access-Control-Allow-*</code> headers.</li><li>Browsers always preflight a cross-site <code>PUT</code> with <code>Content-Type: application/json</code>.</li></ul>
+<h4>How to verify</h4><p>from a page on another origin, call the route with the victim's session and observe whether the request is sent at all. Not executed in this review.</p>
+<h4>Evidence</h4><p>none gathered; this finding is from code alone.</p>
+</div></details>
+</article>
+<article class="threat ok" id="t4"><div class="threat-head"><h3>T4 · Cross-site scripting (XSS)</h3><span class="badge ok">✅ Mitigated</span></div>
+<p class="where"><b>Category:</b> <span class="badge inject">💉 Source to sink</span> · <b>Sink:</b> SK2</p>
+<p class="justification"><b>Justification</b><br />The description from the response is written with <code>.textContent</code>, so the browser shows it as text and never parses it as HTML.</p>
+<pre class="code" data-lang="js"><span class="file">public/tasks.js</span><span class="l"><span class="n">32</span>  const task = await res.json()</span><span class="l"><span class="n">33</span>  document.getElementById(`desc-${id}`).textContent = task.description</span></pre>
+<p class="source-link">🔗 <a href="https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L32-L33"><code>public/tasks.js#L32-L33</code></a></p>
+<details><summary>Detailed analysis, repro steps and evidence</summary><div class="details-body">
+<h4>Trace</h4><p><code>description</code> (EP1 body) → stored by SK1 → returned in the <code>200</code> response → written at L33 with <code>.textContent</code>.</p>
+<h4>Checked</h4>
+<ul><li>The new code has no <code>innerHTML</code>, <code>outerHTML</code>, <code>insertAdjacentHTML</code> or <code>document.write</code>.</li><li>The element's ID is built from <code>id</code>, the numeric task ID passed from the button, not from user text.</li></ul>
+<h4>Repro (confirms the control)</h4>
+<ol><li>Edit a task and enter <code>&lt;img src=x onerror=alert(1)&gt;</code> as the description.</li><li>Watch the task list.</li></ol>
+<h4>Evidence</h4><p>the task shows the literal text <code>&lt;img src=x onerror=alert(1)&gt;</code>, and no alert appears.</p>
+</div></details>
+</article>
+<article class="threat ok" id="t5"><div class="threat-head"><h3>T5 · SQL injection</h3><span class="badge ok">✅ Mitigated</span></div>
+<p class="where"><b>Category:</b> <span class="badge inject">💉 Source to sink</span> · <b>Sink:</b> SK1</p>
+<p class="justification"><b>Justification</b><br /><code>description</code> and <code>id</code> are passed to PostgreSQL as parameters (<code>$1</code>, <code>$2</code>), never concatenated into the SQL text.</p>
+<pre class="code" data-lang="js"><span class="file">store/taskStore.js</span><span class="l"><span class="n">18</span>async function update(id, description) {</span><span class="l"><span class="n">19</span>  const { rows } = await db.query(</span><span class="l"><span class="n">20</span>    `UPDATE tasks SET description = $1</span><span class="l"><span class="n">21</span>     WHERE id = $2 RETURNING *`,</span><span class="l"><span class="n">22</span>    [description, id])</span><span class="l"><span class="n">23</span>  return rows[0]</span><span class="l"><span class="n">24</span>}</span></pre>
+<p class="source-link">🔗 <a href="https://github.com/example-org/todo-app/blob/9f3c2ab/store/taskStore.js#L18-L24"><code>store/taskStore.js#L18-L24</code></a></p>
+<details><summary>Detailed analysis, repro steps and evidence</summary><div class="details-body">
+<h4>Trace</h4><p><code>req.body.description</code> (EP1) → <code>store.update(task.id, description)</code> → <code>db.query</code> with a fixed SQL string and a parameter array.</p>
+<h4>Checked</h4>
+<ul><li>The SQL text is a constant; the template literal has no <code>${…}</code> placeholders.</li><li><code>id</code> comes from the task already loaded from the database (T2), not straight from the URL.</li></ul>
+<h4>Repro (confirms the control)</h4>
+<pre class="code" data-lang="bash"><span class="l">curl -i -X PUT https://todo.example.com/api/tasks/42 \</span><span class="l">  -H 'Cookie: connect.sid=&lt;alice session&gt;' \</span><span class="l">  -H 'Content-Type: application/json' \</span><span class="l">  -d "{\"description\": \"x', owner_id = 1 --\"}"</span></pre>
+<h4>Evidence</h4>
+<pre class="code" data-lang="http"><span class="l">HTTP/1.1 200 OK</span><span class="l"> </span><span class="l">{"id": 42, "owner_id": 7, "description": "x', owner_id = 1 --"}</span></pre>
+<p>The payload is stored as plain text, and <code>owner_id</code> is unchanged.</p>
+</div></details>
+</article>
+</section>
+<section id="action-items"><h2>6. ✅ Action items</h2>
+<p>Everything that needs a decision, in one place. Each links to the threat it came from.</p>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Action</th><th>Threat</th><th>Status</th><th>Severity</th><th>Priority</th><th>Effort</th></tr></thead><tbody>
+<tr><td>A1</td><td>Set <code>httpOnly</code>, <code>secure</code> and <code>sameSite: 'lax'</code> on the session cookie</td><td><a href="#t3">T3</a></td><td><span class="badge warn">⚠️ Partially mitigated</span></td><td>Low</td><td>Hardening — before the route accepts other content types</td><td>Small</td></tr>
+</tbody></table></div>
+<p><b>Nothing to do for</b> <a href="#t1">T1</a>, <a href="#t2">T2</a>, <a href="#t4">T4</a> and <a href="#t5">T5</a>: the controls are in place and were checked against the code.</p>
+</section>
+</main>
+</div>
+<script id="code-highlighter">
+// Syntax highlighting for <pre class="code"> blocks. Built into the report so it
+// needs no libraries and looks the same everywhere. Colors are the --tk-* variables.
+(() => {
+  const JS_KEYWORDS = new Set(
+    'as async await break case catch class const continue debugger default delete do else enum export extends finally for from function if implements import in instanceof interface keyof let new of private protected public readonly return satisfies static super switch this throw try type typeof var void while with yield'.split(' ')
+  );
+  const JS_LITERALS = new Set(['true', 'false', 'null', 'undefined', 'NaN', 'Infinity']);
+  const SQL_KEYWORDS = new Set(
+    'select from where and or not insert into values update set delete join left right inner outer full cross on group by order having limit offset as union all distinct create table alter drop index primary key foreign references default null is in like ilike returning case when then else end exists between asc desc with count sum avg min max'.split(' ')
+  );
+
+  const STRING = /`(?:\\[\s\S]|[^\\`])*`|'(?:\\.|[^\\'\n])*'|"(?:\\.|[^\\"\n])*"/y;
+  const NUMBER = /\b(?:0[xob][\da-f_]+|\d[\d_]*(?:\.\d+)?(?:e[+-]?\d+)?n?)\b/iy;
+
+  const jsWord = (text, code, end) => {
+    if (JS_KEYWORDS.has(text)) return 'k';
+    if (JS_LITERALS.has(text)) return 'n';
+    if (/^\s*\(/.test(code.slice(end, end + 12))) return 'f';
+    if (/^[A-Z]/.test(text)) return 't';
+    return null;
+  };
+
+  // Each rule is [token class, or a function returning one, sticky regex]. First match wins.
+  const JS = [
+    ['c', /\/\/[^\n]*|\/\*[\s\S]*?\*\//y],
+    ['s', STRING],
+    [jsWord, /[A-Za-z_$][\w$]*/y],
+    ['n', NUMBER],
+  ];
+
+  const LANGS = {
+    js: JS,
+    tsx: [JS[0], JS[1], ['t', /<\/?[A-Za-z][\w.]*/y], JS[2], JS[3]],
+    bash: [
+      ['c', /(?<![^\s])#[^\n]*/y],
+      ['s', /'[^']*'|"(?:\\.|[^\\"])*"/y],
+      ['v', /\$\{[^}\n]*\}|\$[A-Za-z_]\w*|\$\d/y],
+      ['f', /(?<=^|\n|[|;&]\s*|\$\(\s*)[A-Za-z_][\w./-]*/y],
+      ['a', /(?<![^\s])--?[A-Za-z][\w-]*/y],
+    ],
+    http: [
+      ['k', /(?<=^|\n)(?:GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD)\b|HTTP\/[\d.]+/y],
+      ['n', /(?<=HTTP\/[\d.]+ )\d{3}\b/y],
+      ['a', /(?<=^|\n)[A-Za-z][\w-]*(?=:)/y],
+      ['s', /"(?:\\.|[^\\"\n])*"/y],
+    ],
+    json: [
+      ['a', /"(?:\\.|[^\\"\n])*"(?=\s*:)/y],
+      ['s', /"(?:\\.|[^\\"\n])*"/y],
+      ['k', /\b(?:true|false|null)\b/y],
+      ['n', /-?\b\d+(?:\.\d+)?(?:e[+-]?\d+)?\b/iy],
+    ],
+    sql: [
+      ['c', /--[^\n]*/y],
+      ['s', /'(?:''|[^'])*'/y],
+      ['v', /\$\d+|\?|(?<![:\w]):[A-Za-z_]\w*/y],
+      [(text) => (SQL_KEYWORDS.has(text.toLowerCase()) ? 'k' : null), /[A-Za-z_]\w*/y],
+      ['n', NUMBER],
+    ],
+    html: [
+      ['c', /<!--[\s\S]*?-->/y],
+      ['t', /<\/?[A-Za-z][\w:-]*|\/?>/y],
+      ['a', /[A-Za-z_:][\w:.-]*(?==)/y],
+      ['s', /"[^"]*"|'[^']*'/y],
+    ],
+    yaml: [
+      ['c', /(?<![^\s])#[^\n]*/y],
+      ['a', /(?<=^|\n)[ \t-]*[\w.-]+(?=:(?:\s|$))/y],
+      ['s', /"(?:\\.|[^\\"\n])*"|'[^'\n]*'/y],
+      ['k', /\b(?:true|false|null)\b/y],
+      ['n', /\b\d+(?:\.\d+)?\b/y],
+    ],
+  };
+
+  const ALIASES = {
+    js: 'js', ts: 'js', mjs: 'js', cjs: 'js', javascript: 'js', typescript: 'js',
+    jsx: 'tsx', tsx: 'tsx',
+    bash: 'bash', sh: 'bash', shell: 'bash', zsh: 'bash', console: 'bash',
+    http: 'http', json: 'json', sql: 'sql',
+    html: 'html', xml: 'html', svg: 'html', vue: 'html',
+    yaml: 'yaml', yml: 'yaml',
+  };
+
+  // Language from the block's data-lang, then its file name, then the code itself.
+  const detectLang = (hint, file, code) => {
+    if (hint && ALIASES[hint]) return ALIASES[hint];
+    const ext = ((file || '').trim().split(/\s/)[0].match(/\.([a-z0-9]+)$/i) || [])[1];
+    if (ext && ALIASES[ext.toLowerCase()]) return ALIASES[ext.toLowerCase()];
+    if (/^\s*(curl|npm|npx|yarn|pnpm|git|node|claude)\b/m.test(code)) return 'bash';
+    if (/^(HTTP\/\d|(GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD) \/)/m.test(code)) return 'http';
+    if (/^\s*[{[]/.test(code) && /"\s*:/.test(code)) return 'json';
+    if (/^\s*<[a-z!]/i.test(code)) return 'html';
+    return hint === 'diff' ? 'js' : null;
+  };
+
+  const tokenize = (code, rules) => {
+    const tokens = [];
+    let plain = '';
+    let i = 0;
+    const push = (cls, text) => {
+      if (!cls) {
+        plain += text;
+        return;
+      }
+      if (plain) tokens.push([null, plain]);
+      plain = '';
+      tokens.push([cls, text]);
+    };
+    const skip = /[A-Za-z0-9_$]+|[^A-Za-z0-9_$]/y;
+    scan: while (i < code.length) {
+      for (const [cls, re] of rules) {
+        re.lastIndex = i;
+        const m = re.exec(code);
+        if (m && m[0]) {
+          push(typeof cls === 'function' ? cls(m[0], code, i + m[0].length) : cls, m[0]);
+          i += m[0].length;
+          continue scan;
+        }
+      }
+      skip.lastIndex = i;
+      const text = skip.exec(code)[0];
+      plain += text;
+      i += text.length;
+    }
+    if (plain) tokens.push([null, plain]);
+    return tokens;
+  };
+
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  // Highlights a block as a whole (so multi-line comments work) and returns HTML per line.
+  const highlightLines = (lines, lang) => {
+    const rules = LANGS[lang];
+    if (!rules) return lines.map(esc);
+    const out = lines.map(() => '');
+    let row = 0;
+    for (const [cls, text] of tokenize(lines.join('\n'), rules)) {
+      text.split('\n').forEach((part, k) => {
+        if (k > 0) row += 1;
+        if (part) out[row] += cls ? `<span class="tk-${cls}">${esc(part)}</span>` : esc(part);
+      });
+    }
+    return out;
+  };
+
+  const isGutter = (node) =>
+    node.nodeType === 1 && (node.classList.contains('n') || node.classList.contains('mk'));
+
+  const run = () => {
+    for (const pre of document.querySelectorAll('pre.code:not([data-highlighted])')) {
+      const lines = Array.from(pre.children).filter((el) => el.classList.contains('l'));
+      const texts = lines.map((line) =>
+        Array.from(line.childNodes).filter((n) => !isGutter(n)).map((n) => n.textContent).join('')
+      );
+      const file = pre.querySelector(':scope > .file');
+      const lang = detectLang(pre.dataset.lang, file ? file.textContent : '', texts.join('\n'));
+      pre.dataset.highlighted = lang || 'none';
+      if (!lang) continue;
+      highlightLines(texts, lang).forEach((html, i) => {
+        Array.from(lines[i].childNodes).filter((n) => !isGutter(n)).forEach((n) => n.remove());
+        lines[i].insertAdjacentHTML('beforeend', html);
+      });
+    }
+  };
+
+  globalThis.reportHighlighter = { detectLang, highlightLines };
+
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+    else run();
+  }
+})();
+</script>
+</body>
+</html>

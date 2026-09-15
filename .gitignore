@@ -1,0 +1,5 @@
+site/
+.venv/
+
+# built from the report template at site build time
+plugins/appsec-skills/wiki/docs/example-report.html

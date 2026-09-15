@@ -1,0 +1,36 @@
+name: Wiki site
+on:
+  push:
+    branches: [main]
+    paths:
+      - "plugins/appsec-skills/wiki/**"
+      - "zensical.toml"
+      - "plugins/appsec-skills/skills/secure-code-review/templates/**"
+      - ".github/workflows/wiki-site.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/configure-pages@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: 3.x
+      - run: pip install zensical==0.0.62
+      # The example report on the site is the skill's own template, copied in so
+      # the two can never drift apart.
+      - run: cp plugins/appsec-skills/skills/secure-code-review/templates/security-review-report.html plugins/appsec-skills/wiki/docs/example-report.html
+      - run: zensical build --clean
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+      - uses: actions/deploy-pages@v5
+        id: deployment

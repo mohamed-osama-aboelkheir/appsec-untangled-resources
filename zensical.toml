@@ -1,0 +1,38 @@
+[project]
+site_name = "AppSec Untangled Wiki"
+site_description = "An application security wiki for developers, from the AppSec Untangled blog."
+docs_dir = "plugins/appsec-skills/wiki/docs"
+site_dir = "site"
+extra_css = ["assets/brand.css"]
+
+[project.theme]
+name = "material"
+features = ["navigation.indexes"]
+logo = "assets/appsec-untangled-logo.png"
+favicon = "assets/favicon.png"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle = { icon = "lucide/moon", name = "Switch to dark mode" }
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle = { icon = "lucide/sun", name = "Switch to light mode" }
+
+[project.markdown_extensions]
+admonition = {}
+attr_list = {}
+def_list = {}
+md_in_html = {}
+footnotes = {}
+"pymdownx.details" = {}
+"pymdownx.inlinehilite" = {}
+"pymdownx.highlight" = { anchor_linenums = true, line_spans = "__span", pygments_lang_class = true }
+"pymdownx.superfences" = { custom_fences = [{ name = "mermaid", class = "mermaid" }] }
+"pymdownx.tabbed" = { alternate_style = true, combine_header_slug = true }
+"pymdownx.snippets" = { base_path = ["plugins/appsec-skills/wiki"], check_paths = true }
+
+[project.markdown_extensions.toc]
+permalink = true

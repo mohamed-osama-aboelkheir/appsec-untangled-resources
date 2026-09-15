@@ -1,0 +1,12 @@
+{
+  "name": "appsec-untangled",
+  "owner": { "name": "Mohamed AboElKheir" },
+  "description": "AppSec Untangled resources: an AppSec wiki and Claude Code skills for security work",
+  "plugins": [
+    {
+      "name": "appsec-skills",
+      "source": "./plugins/appsec-skills",
+      "description": "AppSec skills backed by the AppSec Untangled wiki"
+    }
+  ]
+}
