@@ -8,8 +8,8 @@
 // <flowsDir>/<id>.flow.json produces .tours/<order>-<id>.tour and <flowsDir>/<id>.md.
 // The spec format is documented in ../references/flow-spec.md.
 
-import fs from 'node:fs';
 import path from 'node:path';
+import { finish, loadSpecs, resolveSelection, text, tourStep } from '../../../lib/tours.mjs';
 
 const [mode = 'build', flowsDir = 'docs/flows'] = process.argv.slice(2);
 if (!['build', 'check'].includes(mode)) {
@@ -35,35 +35,15 @@ const FALLBACK_COLOR = 'rgba(128,128,128,0.06)';
 const FILE_BOX_COLOR = 'rgba(255,255,255,0.75)';
 const ICONS = { control: '🔒 ', sink: '⚠️ ', source: '🎯 ' };
 
-const text = (value) => (Array.isArray(value) ? value.join('\n') : value ?? '');
 // Mermaid treats ";" as a statement end and "#" as an entity start.
 const mm = (value) => String(value).replace(/#/g, '#35;').replace(/;/g, '#59;').replace(/\n/g, '<br/>');
 const shortPath = (file) => file.replace(/^src\//, '');
 
-function position(content, offset) {
-  const lines = content.slice(0, offset).split('\n');
-  return { line: lines.length, character: lines[lines.length - 1].length + 1 };
-}
-
 function resolveStep(flowId, step) {
   if (!step.file) return;
   const where = `${flowId} step ${step.n} (${step.file})`;
-  if (!step.pattern) return problems.push(`${where}: has a file but no pattern`);
-  const filePath = path.join(root, step.file);
-  if (!fs.existsSync(filePath)) return problems.push(`${where}: file not found`);
-
-  const content = fs.readFileSync(filePath, 'utf8');
-  let matches;
-  try {
-    matches = [...content.matchAll(new RegExp(step.pattern, 'gmd'))];
-  } catch (error) {
-    return problems.push(`${where}: invalid regex: ${error.message}`);
-  }
-  if (matches.length !== 1) {
-    return problems.push(`${where}: pattern matched ${matches.length} times, expected exactly 1`);
-  }
-  const [start, end] = matches[0].indices[1] ?? matches[0].indices[0];
-  step.selection = { start: position(content, start), end: position(content, end) };
+  const selection = resolveSelection({ root, where, file: step.file, pattern: step.pattern, problems });
+  if (selection) step.selection = selection;
 }
 
 function stepLabel(step) {
@@ -216,17 +196,7 @@ function buildTour(flow, flowsById, isPrimary) {
     if (next) tour.nextTour = next.title;
     else problems.push(`${flow.id}: next flow "${flow.next}" not found`);
   }
-  tour.steps = flow.steps.map((step) => {
-    const tourStep = { title: stepLabel(step), description: text(step.description) };
-    if (step.file) {
-      tourStep.file = step.file;
-      tourStep.pattern = step.pattern;
-      if (step.selection) tourStep.selection = step.selection;
-      // Pin the tab so each file stays open when the next step opens another one.
-      tourStep.commands = ['workbench.action.keepEditor'];
-    }
-    return tourStep;
-  });
+  tour.steps = flow.steps.map((step) => tourStep({ ...step, title: stepLabel(step) }));
   return JSON.stringify(tour, null, 2) + '\n';
 }
 
@@ -242,27 +212,7 @@ function validate(flow, file) {
 }
 
 const dir = path.join(root, flowsDir);
-if (!fs.existsSync(dir)) {
-  console.error(`no flows directory: ${flowsDir}`);
-  process.exit(2);
-}
-const specFiles = fs.readdirSync(dir).filter((file) => file.endsWith('.flow.json')).sort();
-if (!specFiles.length) {
-  console.error(`no *.flow.json files in ${flowsDir}`);
-  process.exit(2);
-}
-
-const flows = specFiles.map((file) => {
-  try {
-    const flow = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
-    validate(flow, file);
-    return flow;
-  } catch (error) {
-    problems.push(`${file}: ${error.message}`);
-    return null;
-  }
-}).filter(Boolean);
-flows.sort((a, b) => (a.order ?? 1) - (b.order ?? 1));
+const flows = loadSpecs({ root, dir: flowsDir, suffix: '.flow.json', problems, validate });
 const flowsById = new Map(flows.map((flow) => [flow.id, flow]));
 
 const outputs = [];
@@ -274,24 +224,4 @@ flows.forEach((flow, index) => {
   outputs.push([path.join(root, '.tours', tourFileName(flow)), buildTour(flow, flowsById, index === 0)]);
 });
 
-if (problems.length) {
-  console.error(problems.map((problem) => `✗ ${problem}`).join('\n'));
-  process.exit(1);
-}
-
-let stale = 0;
-for (const [file, content] of outputs) {
-  const relative = path.relative(root, file);
-  const current = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
-  if (current === content) continue;
-  if (mode === 'check') {
-    console.error(`✗ ${relative} is out of date: run walkthrough.mjs build`);
-    stale++;
-  } else {
-    fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, content);
-    console.log(`✓ wrote ${relative}`);
-  }
-}
-if (mode === 'check') console.log(stale ? '' : `✓ ${outputs.length} files up to date`);
-process.exit(stale ? 1 : 0);
+finish({ root, mode, outputs, problems, script: 'walkthrough.mjs' });

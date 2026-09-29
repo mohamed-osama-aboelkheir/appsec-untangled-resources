@@ -67,6 +67,30 @@ tour (`.tours/`) and the diagram page (`docs/flows/<id>.md`) from it, so the
 two never drift apart. Tour steps are anchored on code patterns, not line
 numbers: after the code changes, rebuild and the highlights follow it.
 
+### source-to-sink
+
+Traces data between sources and dangerous sinks, like a SAST dataflow trace,
+and shows it so you can check it yourself. **Backward** from a sink (a
+file:line or a scanner finding): which sources reach it, is any of them user
+input, and who can send it. **Forward** from an input: which sinks it reaches,
+or where it stops. Forward mode uses the wiki's source-to-sink threat pages as
+its sink catalogue.
+
+```
+/appsec-skills:source-to-sink src/repositories/orderRepository.js:10
+/appsec-skills:source-to-sink the node-postgres-sqli findings in semgrep.json
+/appsec-skills:source-to-sink req.query.file on GET /exports
+```
+
+Each trace is a diagram of code cards, one chain per source, top to bottom:
+the line of code at every hop with the value in bold, arrows named after the
+value (`sort → orderColumn`), coloured by the source's origin (user input,
+config, constant, stored data…), ending in the sink. Controls on the path are
+shown as side cards, including the ones that don't cover the value. A matching
+CodeTour highlights just the value on each line. It classifies sources but
+gives no exploitability verdict or severity: that's a triage decision, and the
+trace is its evidence.
+
 ## Layout
 
 ```
@@ -74,6 +98,8 @@ numbers: after the code changes, rebuild and the highlights follow it.
 plugins/appsec-skills/
 ├── skills/secure-code-review/      review skill, its report templates and renderer
 ├── skills/code-walkthrough/        walkthrough skill, its spec reference and generator
+├── skills/source-to-sink/          dataflow trace skill, its spec reference and generator
+├── lib/tours.mjs                   CodeTour helpers shared by the two generators
 └── wiki/
     ├── docs/                       the website: methodology, threats, guides
     └── examples/                   per-technology code examples, included into the threat pages
