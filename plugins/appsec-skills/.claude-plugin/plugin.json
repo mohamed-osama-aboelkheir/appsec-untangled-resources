@@ -1,6 +1,6 @@
 {
   "name": "appsec-skills",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "AppSec skills backed by the AppSec Untangled wiki",
   "author": { "name": "Mohamed AboElKheir" }
 }
