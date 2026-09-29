@@ -78,12 +78,18 @@ A trace follows one value, not the whole request. If it doesn't exist, work from
    `stored`, `external`; see the spec). For user input, record **who can send it** from the
    route's middleware (anonymous, any logged-in user, a role). For config or stored data, record
    **who can write it**.
-4. **Lookups end user input.** When user input is only used to *select* something (an object key,
+4. **Stored values: keep going to the writer.** When the value is read from a database, cache or file,
+   don't stop there: find the code that writes that field (search for the column or key) and
+   continue the path back to the input it stores, one level. The storage write and the read become
+   hops (`stored in comments.body`, `read back for every visitor`), and the source is the writer's
+   input, with who can write it *and* who receives it in its `label`. Only stop at a `stored` source
+   when nothing in the codebase writes the field (a migration, another service), and say so.
+5. **Lookups end user input.** When user input is only used to *select* something (an object key,
    an ID for a row, a switch case) and its own value goes no further, end its path with a `stop`
    card. The value that continues (the config entry, the database row) is a new source with its
    own origin. This is the difference between "user input reaches the sink" and "user input
    picks which trusted value reaches the sink".
-5. **Record the controls on each path** as side cards attached to the card they sit on:
+6. **Record the controls on each path** as side cards attached to the card they sit on:
    validation, allowlists, casts, sanitisers, parameterisation, encoding. Say exactly what each
    one covers. A check on another field, or one that doesn't fit this sink (HTML-escaping before
    SQL), is a `gap`.
@@ -126,7 +132,9 @@ One `docs/traces/<id>.trace.json` per sink (backward) or per input (forward), in
 - **Side cards** (`gap`, `control`) attach to the card whose line they guard, usually the next hop
   after the check. Include the route's auth gate as a `control` on the user-input source when it
   decides who can send it.
-- **Pattern:** the capture group is **the value itself**, not the whole line.
+- **Pattern:** the capture group is **the value itself**, not the whole line. For a config or
+  constant source, capture the literal values that reach the sink (the two table names), not the
+  variable or `module.exports` that holds them.
 - **Code:** the line trimmed, with the value in `**bold**`.
 - **Edge:** the value's name on the next card (`orderBy`), or the rename (`sort → orderColumn`).
   Never start it with an arrow.

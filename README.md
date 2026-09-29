@@ -91,6 +91,28 @@ CodeTour highlights just the value on each line. It classifies sources but
 gives no exploitability verdict or severity: that's a triage decision, and the
 trace is its evidence.
 
+### semgrep-triage
+
+Turns scanner findings into decisions you can check. For each finding it traces
+the flagged value back to its sources (with `source-to-sink`), checks the
+controls on the path against the wiki's mitigations and *Bypasses to check*,
+and decides true or false positive, severity (impact × likelihood, compared
+with the scanner's) and confidence.
+
+```
+/appsec-skills:semgrep-triage semgrep.json
+/appsec-skills:semgrep-triage semgrep.json --learn     # you decide first, then compare
+```
+
+It writes one Markdown report (lists, no tables). Every finding gets its
+source-to-sink diagram and CodeTour, the evidence, and collapsed
+**Manual Reproduction** steps with the exact files, searches and harmless local
+requests to repeat the analysis. True positives get a **Suggested fix** (code,
+why it holds, how to verify it, tested on a scratch copy when the app runs).
+False positives get what would make them real, and a **rule decision**:
+disable the rule for the repo, or keep it and suppress this instance. It never
+changes the application or writes attack payloads, and keeps findings private.
+
 ## Layout
 
 ```
@@ -99,6 +121,7 @@ plugins/appsec-skills/
 ├── skills/secure-code-review/      review skill, its report templates and renderer
 ├── skills/code-walkthrough/        walkthrough skill, its spec reference and generator
 ├── skills/source-to-sink/          dataflow trace skill, its spec reference and generator
+├── skills/semgrep-triage/          triage skill, its report template and helper script
 ├── lib/tours.mjs                   CodeTour helpers shared by the two generators
 └── wiki/
     ├── docs/                       the website: methodology, threats, guides
