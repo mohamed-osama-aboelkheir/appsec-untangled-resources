@@ -113,6 +113,25 @@ False positives get what would make them real, and a **rule decision**:
 disable the rule for the repo, or keep it and suppress this instance. It never
 changes the application or writes attack payloads, and keeps findings private.
 
+### security-experiment
+
+Shows *why* a control makes a sink safe, in a notebook you run step by step.
+One classic payload goes through the application's real steps twice: without
+the control, then with it. Every step prints its value with the dangerous part
+highlighted, so you watch the payload survive each step and disappear at the
+control's step. The sink's real output (e.g. the rendered page) closes each
+half.
+
+```
+/appsec-skills:security-experiment why DOMPurify makes comments.ejs:18 safe
+```
+
+It uses the app's own code and library versions (pinned from the lockfile), a
+Deno notebook for JavaScript/TypeScript or a Python one for Python projects,
+and keeps it to a 2–3 minute read. A helper builds the notebook from a Markdown
+file of cells and verifies it by running a copy. The notebook is saved without
+outputs, so you run each step yourself.
+
 ## Layout
 
 ```
@@ -122,6 +141,7 @@ plugins/appsec-skills/
 ├── skills/code-walkthrough/        walkthrough skill, its spec reference and generator
 ├── skills/source-to-sink/          dataflow trace skill, its spec reference and generator
 ├── skills/semgrep-triage/          triage skill, its report template and helper script
+├── skills/security-experiment/     experiment skill, its step logger and notebook builder
 ├── lib/tours.mjs                   CodeTour helpers shared by the two generators
 └── wiki/
     ├── docs/                       the website: methodology, threats, guides
