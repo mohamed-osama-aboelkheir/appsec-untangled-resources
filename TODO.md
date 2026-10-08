@@ -386,7 +386,8 @@ Sets the depth for every later batch.
 - [ ] `command-injection/go.md`
 - [ ] `insecure-deserialization/go.md`
 - [ ] `xxe/go.md`
-## Batch 8: Tier 2
+
+### Batch 8: Tier 2
 
 Add these when a real review needs them, or after Tier 1 is done.
 
