@@ -21,6 +21,10 @@ The attacker stores or reflects a payload, such as `<img src=x onerror=…>` or 
 
     --8<-- "examples/xss/ejs.md"
 
+=== "Nunjucks (JS)"
+
+    --8<-- "examples/xss/nunjucks.md"
+
 ## Resources
 
 - [OWASP XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)

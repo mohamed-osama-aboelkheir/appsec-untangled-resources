@@ -132,6 +132,7 @@ Sets the depth for every later batch.
 #### View layer (XSS)
 
 - [x] `xss/ejs.md`
+- [x] `xss/nunjucks.md`
 - [ ] `xss/handlebars.md`
 - [ ] `xss/react.md`
 - [ ] `xss/vue.md`
