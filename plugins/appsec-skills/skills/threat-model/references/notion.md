@@ -41,6 +41,9 @@ the first paragraph and in the page title.
 Create in batches (one create call per database) and keep the returned page
 URLs: later rows relate to earlier ones.
 
+Wrap code identifiers in text properties in backticks (`` `messageStore.save` ``):
+Notion turns bare `name.name` into a web link.
+
 **Stories**
 
 - `Story`: `S1: Organizer creates an event`
