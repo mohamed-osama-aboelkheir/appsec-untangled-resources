@@ -14,6 +14,11 @@ The attacker sends a link on your trusted domain that bounces the victim to a ph
 - Compare parsed origins, never string prefixes.
 - For OAuth, match registered redirect URIs exactly.
 
+## Test
+
+- **Point-in-time:** try the redirect parameter with `//evil.example`, `/\evil.example`, `https://app.example.com.evil.example` and `javascript:`. Each must land on your own origin.
+- **Continuous:** a unit test on the redirect validator with those cases, and a check that OAuth redirect URIs are registered exactly.
+
 ## Examples
 
 === "Express (JS)"

@@ -14,6 +14,11 @@ The attacker adds fields the UI never sends, such as `"role": "admin"`, `"compan
 - Set ownership, tenant and privileged fields on the server, never from the body.
 - Build responses from an explicit list of fields.
 
+## Test
+
+- **Point-in-time:** send create and update requests with extra fields (`role`, `ownerId`, `tenantId`, `status`, `price`) and check none is stored. Check responses for fields the caller shouldn't see.
+- **Continuous:** a unit test on the schema or DTO that rejects or ignores unknown keys, and a response snapshot test that fails when a new field appears.
+
 ## Examples
 
 === "Express (JS)"

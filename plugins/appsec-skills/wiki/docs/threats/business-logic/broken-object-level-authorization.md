@@ -15,6 +15,11 @@ The attacker replaces the ID with one that belongs to someone else, and the serv
 - Return the same `404` for "doesn't exist" and "not yours".
 - Don't rely on IDs being hard to guess.
 
+## Test
+
+- **Point-in-time:** with two users, have user B request, change and delete user A's resource by its ID, including IDs in the body and child IDs. Each must fail with the same `404` as a missing record.
+- **Continuous:** a two-user integration test per resource route, kept in CI. Add a test row whenever a route that takes an ID is added.
+
 ## Examples
 
 === "Express (JS)"

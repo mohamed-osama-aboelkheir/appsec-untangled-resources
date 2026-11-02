@@ -14,6 +14,11 @@ The input changes the structure of the query instead of being treated as a value
 - Allowlist identifiers: sort columns, directions and table names.
 - Connect with a least-privilege database user.
 
+## Test
+
+- **Point-in-time:** review every query the input reaches for concatenation, including raw fragments and `ORDER BY`, and send quote and sort payloads to the endpoints. A DAST scan covers the rest.
+- **Continuous:** a SAST rule (for example Semgrep) that fails the build on string-built SQL, and a unit test that an unknown sort column is rejected.
+
 ## Examples
 
 === "node-postgres (JS)"

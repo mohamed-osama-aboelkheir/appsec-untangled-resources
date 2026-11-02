@@ -19,6 +19,11 @@ A lower-privileged user calls the privileged endpoint directly, because the rest
 - Enforce a delegation ceiling: a user can only grant roles or permissions they already hold.
 - Never trust a role or permission sent by the client.
 
+## Test
+
+- **Point-in-time:** call every privileged route with the token of a role that shouldn't have it. Each must return `403`, including the sibling methods (`GET`, `POST`, `DELETE`) of the same resource.
+- **Continuous:** a role-by-route matrix test (role × route → expected status) that runs in CI. A role that grants a role above its own is one of the rows.
+
 ## Examples
 
 === "Express (JS)"

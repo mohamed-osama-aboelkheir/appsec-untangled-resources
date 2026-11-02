@@ -14,6 +14,10 @@ you can compare against your own.
   a security review.
 - **[The threats](threats/index.md)** — the catalogue. Go straight here when you
   are mid-review and need one answer.
+- **[Threat modeling: Doors, Windows & Holes](threat-modeling/index.md)** —
+  threat model a design, a feature or a whole system: find the doors, windows
+  and holes, group them, write the threats and mitigations, and end with a
+  testing plan.
 - **[Using the skill](using-the-skill.md)** — run the same method as a Claude
   Code skill, which reads these pages and checks a diff against them.
 

@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threat-model.schema.json",
+  "title": "Doors, Windows & Holes threat model",
+  "type": "object",
+  "required": ["system", "stories", "groups", "threats", "tests"],
+  "additionalProperties": false,
+  "properties": {
+    "system": {
+      "type": "object",
+      "required": ["name", "mode", "date"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "mode": { "enum": ["design", "code", "feature"] },
+        "date": { "type": "string", "format": "date" },
+        "version": { "type": "string", "description": "Commit SHA in code mode, document version in design mode" },
+        "goal": { "type": "string" },
+        "roles": { "type": "array", "items": { "type": "string" } },
+        "scope": { "type": "array", "items": { "type": "string" } },
+        "data": { "type": "array", "items": { "type": "string" } },
+        "components": { "type": "array", "items": { "type": "string" } },
+        "assumptions": { "type": "array", "items": { "type": "string" } },
+        "openQuestions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "stories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "actor", "diagram"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^S[0-9]+$" },
+          "title": { "type": "string" },
+          "actor": { "type": "string" },
+          "summary": { "type": "string" },
+          "diagram": { "type": "string", "description": "Mermaid sequenceDiagram with autonumber" }
+        }
+      }
+    },
+    "groups": {
+      "description": "Doors, windows and holes, one entry per group that shares threats and mitigations",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "name", "members"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[DWH][0-9]+$" },
+          "type": { "enum": ["door", "window", "hole"] },
+          "name": { "type": "string" },
+          "members": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "groupedBecause": { "type": "string" },
+          "component": { "type": "string" },
+          "storySteps": { "type": "array", "items": { "type": "string", "description": "For example S3 · step 2" } },
+          "whoCanReach": {
+            "type": "array",
+            "items": {
+              "enum": ["Anonymous", "Any signed-in user", "Resource owner", "Role or group", "Other tenant", "Third party / SaaS", "Cloud principal (IAM)", "Internal service", "Pipeline / admin"]
+            }
+          },
+          "authentication": { "type": "string" },
+          "inputOrExposure": { "type": "string" },
+          "windowKind": {
+            "enum": ["Compute", "Queue / event bus", "Object storage", "Database / cache", "Identity provider", "DNS / CDN / load balancer", "Secrets and keys", "SaaS / OAuth integration", "Repo / CI/CD / IaC", "Admin tool", "Exported file", "Email / SMS provider", "Scheduler", "Mobile / desktop app", "Logs / monitoring", "Other"]
+          },
+          "sinkType": {
+            "enum": ["SQL", "NoSQL", "HTML / DOM", "Template", "Outbound URL", "Redirect", "File path / object key", "Client-side request path", "HTML → PDF", "CSV / spreadsheet", "Email body / headers", "OS command", "Deserialization", "XML", "Token / QR parsing", "Logs", "Dependency", "Other"]
+          },
+          "ruledOut": {
+            "description": "Threats considered and not applicable, one line each",
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "threats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "group", "title", "who", "what", "impact", "mitigation", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^T[0-9]+$" },
+          "group": { "type": "string", "description": "id of the door, window or hole group" },
+          "sourceDoor": { "type": "string", "description": "Bucket 2: id of the door group the input enters through" },
+          "bucket": { "enum": ["business-logic", "source-to-sink"] },
+          "libraryThreat": { "type": "string", "description": "Wiki page, for example threats/business-logic/broken-object-level-authorization or threat-modeling/business-rules#race-conditions" },
+          "title": { "type": "string" },
+          "who": { "type": "string" },
+          "what": { "type": "string" },
+          "impact": { "type": "string" },
+          "mitigation": { "type": "string" },
+          "mitigationKind": {
+            "enum": ["No user input reaches it", "Safe function", "Validation / sanitization", "Access control check", "Business rule check", "Platform / cloud config", "Process"]
+          },
+          "status": {
+            "enum": ["Not discussed", "❓ Needs verification", "❌ Missing", "⚠️ Partially mitigated", "✅ Mitigated", "Risk accepted"]
+          },
+          "severity": { "enum": ["Critical", "High", "Medium", "Low"] },
+          "evidence": { "type": "string", "description": "path:line in code mode, design reference or 'Assumption' in design mode" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "threats", "when", "type"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^Q[0-9]+$" },
+          "title": { "type": "string" },
+          "threats": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "when": { "type": "array", "items": { "enum": ["Point-in-time", "Continuous"] }, "minItems": 1 },
+          "type": {
+            "enum": ["Unit test", "Integration test", "Concurrency / load test", "Code review", "Config review", "DAST / manual request", "Pen test", "SAST rule", "Policy-as-code / IaC check", "Dependency scan", "Monitoring / alert"]
+          },
+          "how": { "type": "string" },
+          "whereItRuns": { "type": "string" },
+          "status": { "enum": ["Not started", "In progress", "✅ Passing", "❌ Failing", "Blocked"] }
+        }
+      }
+    }
+  }
+}

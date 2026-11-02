@@ -14,6 +14,11 @@ The attacker uses `../` sequences to reach files outside the intended folder. Va
 - If you must use input, resolve it against the base folder and confirm the result stays inside it. Use `fs.realpath` when symlinks are possible.
 - Use `res.sendFile(name, { root })`, which rejects paths that escape the root.
 
+## Test
+
+- **Point-in-time:** send `../`, encoded `..%2f`, absolute paths and backslashes to every route that builds a path, and an archive with a `../` entry to every extractor. Nothing outside the base folder may be read or written.
+- **Continuous:** a unit test on the path helper with those cases, and a SAST rule for request data reaching `fs.*`, `sendFile` or archive extraction.
+
 ## Examples
 
 === "Node.js (JS)"

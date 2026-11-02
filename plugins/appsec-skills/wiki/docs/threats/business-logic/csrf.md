@@ -15,6 +15,11 @@ A page on another site makes the victim's browser send the request, and the brow
 - Never change state on `GET`. Accept only `application/json` bodies where possible.
 - Don't reflect arbitrary origins in `Access-Control-Allow-Origin` together with credentials.
 
+## Test
+
+- **Point-in-time:** send each state-changing request with the session cookie but without the CSRF token, with a foreign `Origin` or `Sec-Fetch-Site: cross-site`, and as a form or `text/plain` body. Each must be rejected. Check the cookie flags.
+- **Continuous:** an integration test that a cross-site state-changing request is rejected, and a config check on cookie flags and the CORS allowlist.
+
 ## Examples
 
 === "Express (JS)"

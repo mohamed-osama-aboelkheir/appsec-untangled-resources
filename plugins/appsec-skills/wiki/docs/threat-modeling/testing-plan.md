@@ -1,0 +1,49 @@
+# Testing plan
+
+The fourth question, "did we do a good job?", turns the threat model into a
+testing plan. Every mitigation gets a test that would **fail if the mitigation
+were missing**. A threat with a mitigation and no test is a claim.
+
+## Point-in-time or continuous
+
+- **Point-in-time** tests run once, before release or after a big change: a
+  manual check with two accounts, a code review of one function, a
+  configuration review, a DAST run, a penetration test.
+- **Continuous** tests run on every change or on a schedule: unit and
+  integration tests in CI, SAST rules, policy-as-code checks on infrastructure,
+  dependency scanning, alerts on suspicious behaviour.
+
+Most mitigations deserve both: check it once now, then add a test so it stays
+true. A one-off check is enough when the thing it checks rarely changes and
+would be reviewed anyway (a registrar lock, MFA on the payment dashboard).
+
+## Pick the test
+
+| Mitigation | Point-in-time | Continuous |
+|---|---|---|
+| AuthN or AuthZ check in code | Requests with two users or two roles | Integration test per route, or a role × route matrix |
+| Business rule (price, quantity, state) | Requests that break the rule | Unit test at the boundary |
+| Race or replay protection | Parallel or repeated requests | Concurrency test |
+| Safe function (parameterized query, auto-escaping) | Code review of every call site | SAST rule that fails on the unsafe form |
+| Validation or sanitization | The payload cases on the wiki page | Unit test on the validator |
+| Cloud or SaaS configuration | Config review, IAM Access Analyzer | Policy-as-code check, AWS Config rule, drift detection |
+| Logging and alerting | Perform the action, find the log | Alert on the event |
+
+Each wiki threat page has a **Test** section with the point-in-time and
+continuous test for that threat.
+
+## What to write for each test
+
+- The **threats** it covers (one test can cover several in the same group).
+- **When**: point-in-time, continuous, or both.
+- **Type**: unit, integration, code review, config review, DAST, SAST rule,
+  policy check, monitoring.
+- **Where it runs**: the CI job, the scheduled check, or the person who runs it.
+- **Status** and **last run**.
+
+## Done
+
+- Every threat is mitigated or explicitly accepted.
+- Every mitigated threat has at least one test, and its point-in-time tests
+  have passed.
+- Every continuous test is in CI or scheduled, with an owner.

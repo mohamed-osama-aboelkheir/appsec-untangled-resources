@@ -21,6 +21,11 @@ Bypasses include redirects, DNS rebinding, and alternative IP encodings such as 
 - Allow only `http:` and `https:`, and expected ports. Set timeouts.
 - Don't return the raw response to the caller.
 
+## Test
+
+- **Point-in-time:** point each URL input at `localhost`, a private address, `169.254.169.254`, a decimal-encoded IP and a URL that redirects to one of them. Each must be refused.
+- **Continuous:** a unit test on the URL validator with those cases, and an egress rule or network policy check that the service can't reach the metadata service or internal ranges.
+
 ## Examples
 
 === "Node.js (JS)"

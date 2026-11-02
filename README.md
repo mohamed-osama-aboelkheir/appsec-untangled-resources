@@ -16,6 +16,7 @@ against it and walk you through how it works.
 
 - [The methodology](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/methodology/) — how to run a threat-model-first review, end to end, over one pull request
 - [The threats](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/) — 14 threats in two categories, each with criteria, attack, mitigation, per-stack code and the bypasses worth checking
+- [Threat modeling](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threat-modeling/) — the Doors, Windows & Holes method for designs, features and whole systems
 - [Using the skill](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/using-the-skill/) — running the same method as a Claude Code skill
 - [Example report](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/example-report.html) — what a finished review looks like
 
@@ -45,6 +46,28 @@ It reads only the wiki example files matching the project's stack, so a review
 costs about the same context however far the wiki grows. It does not attempt
 exploitation, and does not look up the project's known vulnerabilities — the
 report shows what the method finds from the code alone.
+
+### threat-model
+
+Threat models a design doc, a feature description or a repository with the
+Doors, Windows & Holes method: stories as numbered sequence diagrams, then the
+**doors** (entry points), **windows** (hidden entry points found by
+de-abstracting each component, SaaS integrations included) and **holes**
+(dangerous sinks). Doors, windows and holes that would get the same threats
+and mitigations are **grouped**, so the model stays short enough to read in
+one meeting. Each group gets its business-logic or source-to-sink threats as
+who / what / impact plus a mitigation, and every mitigation gets a
+point-in-time and/or continuous test.
+
+```
+/appsec-skills:threat-model docs/design/checkout.md
+/appsec-skills:threat-model .                     # the current repository
+/appsec-skills:threat-model the new reminders feature, against threat-model/threat-model.json
+```
+
+It writes `threat-model.md` and `threat-model.json`, and can fill a copy of
+the Notion threat model template (stories, doors/windows/holes, threats and
+testing plan databases) through the Notion connector.
 
 ### code-walkthrough
 
@@ -138,6 +161,7 @@ outputs, so you run each step yourself.
 .claude-plugin/marketplace.json     the marketplace
 plugins/appsec-skills/
 ├── skills/secure-code-review/      review skill, its report templates and renderer
+├── skills/threat-model/            threat modeling skill, its report template, schema and Notion guide
 ├── skills/code-walkthrough/        walkthrough skill, its spec reference and generator
 ├── skills/source-to-sink/          dataflow trace skill, its spec reference and generator
 ├── skills/semgrep-triage/          triage skill, its report template and helper script
