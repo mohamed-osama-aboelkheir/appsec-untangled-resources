@@ -18,6 +18,11 @@ Express parses `?password[$ne]=x` and JSON bodies into objects. A filter like `{
 - Reject keys that start with `$` or contain `.`, for example with Mongoose `sanitizeFilter`.
 - Build filters and updates from allowlisted fields. Never pass input to `$where`.
 
+## Test
+
+- **Point-in-time:** send operator objects where strings are expected (`?field[$ne]=x`, `{"field": {"$gt": ""}}`) to every route that queries with input. Each must be rejected or treated as a literal.
+- **Continuous:** a unit test on the input schema or sanitizer, and a SAST rule for request data reaching `find`, `update` or `$where` without it.
+
 ## Examples
 
 === "Mongoose (JS)"

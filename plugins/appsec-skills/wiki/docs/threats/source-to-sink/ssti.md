@@ -19,6 +19,11 @@ Template syntax in the input runs on the server. In EJS, for example, `<%= proce
 - If users must author templates, use a logic-less engine (Mustache, or Handlebars without custom helpers) and render them in a sandbox.
 - Pass render functions only the fields they need, never whole request objects.
 
+## Test
+
+- **Point-in-time:** put the engine's expression syntax (`{{7*7}}`, `<%= 7*7 %>`) in every field that reaches a template and check it comes out literally.
+- **Continuous:** a SAST rule that flags templates compiled from strings with input, and a unit test on any user-authored template renderer.
+
 ## Examples
 
 === "EJS (JS)"

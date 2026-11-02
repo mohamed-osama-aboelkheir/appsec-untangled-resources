@@ -57,7 +57,7 @@ change introduces or feeds.
 ## How to use a page
 
 Read **When is it relevant** first and rule the threat in or out. If it applies,
-work through **Mitigation**, then open the tab for your stack: it lists the
+work through **Mitigation** and **Test**, then open the tab for your stack: it lists the
 mitigation options, vulnerable and fixed code for each, the **bypasses worth
 checking**, and what to grep for.
 

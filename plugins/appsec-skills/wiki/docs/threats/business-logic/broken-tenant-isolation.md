@@ -20,6 +20,11 @@ A member of tenant A reaches tenant B's data or actions. Typical ways in:
 - Apply the tenant filter centrally (repository or query helper), including keys, tokens, files, jobs and caches.
 - Bind issued credentials to the tenant they were created in.
 
+## Test
+
+- **Point-in-time:** with users in two tenants, have tenant B's user reach tenant A's resources by ID, by switching the tenant header or parameter, and through exports, jobs and file paths.
+- **Continuous:** a two-tenant integration test in CI, and a lint or code-review rule that every query on a tenant-owned table goes through the tenant-scoped helper.
+
 ## Examples
 
 === "Express (JS)"

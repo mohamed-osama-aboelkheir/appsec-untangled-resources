@@ -10,8 +10,10 @@ built into a GitHub Pages site with Zensical.
 - `plugins/appsec-skills/.claude-plugin/plugin.json`: plugin manifest
 - `plugins/appsec-skills/skills/<skill-name>/SKILL.md`: one folder per skill
 - `plugins/appsec-skills/wiki/docs/`: wiki pages (site source and skill reference).
-  `threats/` is what the skill reads; `methodology.md` and `using-the-skill.md`
-  are for readers of the site and are never loaded by a skill.
+  `threats/` is what the skills read; `threat-modeling/` is the Doors, Windows
+  & Holes method, read by the `threat-model` skill; `methodology.md` and
+  `using-the-skill.md` are for readers of the site and are never loaded by a
+  skill.
   `example-report.html` is copied from the report template at build time and is
   gitignored — edit the template, not the copy.
 - `plugins/appsec-skills/wiki/examples/`: per-stack examples, included into pages

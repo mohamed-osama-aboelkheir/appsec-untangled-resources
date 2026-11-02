@@ -15,6 +15,11 @@ The attacker stores or reflects a payload, such as `<img src=x onerror=…>` or 
 - Allow only `http:` and `https:` in links and sources built from data.
 - Serve APIs as `application/json`, and add a Content Security Policy as defense in depth.
 
+## Test
+
+- **Point-in-time:** store a script, an event-handler attribute and a `javascript:` link in every field that is rendered, then view each page where it appears, including admin and organizer pages.
+- **Continuous:** a SAST rule for `innerHTML`, `dangerouslySetInnerHTML`, `v-html` and unescaped template output, a unit test on the sanitizer, and a CSP header check.
+
 ## Examples
 
 === "EJS (JS)"

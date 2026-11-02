@@ -19,6 +19,11 @@ The attacker calls the entry point with no credentials, or with expired, forged 
 - Fail closed: missing, malformed or unverifiable credentials end the request with `401`.
 - Verify tokens fully: signature with a pinned algorithm, expiry, issuer and audience. Check that the session or key is still active.
 
+## Test
+
+- **Point-in-time:** call each entry point with no credentials, an expired token, a token with a bad signature and a token from another issuer or audience. Every one must return `401`.
+- **Continuous:** an integration test that walks the route table and asserts every route not on the public list rejects an anonymous request, so a new route outside the middleware fails the build.
+
 ## Examples
 
 === "Express (JS)"

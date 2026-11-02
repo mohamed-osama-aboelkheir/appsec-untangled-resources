@@ -33,6 +33,11 @@ a reason to trust it.
 - Review both directions: state-changing sinks (forced action) and `GET` sinks
   whose response is displayed (data disclosure).
 
+## Test
+
+- **Point-in-time:** store an identifier containing `../` (or put it in the URL) and check that the request the front end sends keeps it inside one encoded path segment.
+- **Continuous:** a unit test on the shared URL builder, and a lint rule or SAST check that flags template literals building `fetch` or `axios` paths outside it.
+
 ## Examples
 
 === "Fetch API (JS)"

@@ -7,6 +7,7 @@ plugins/appsec-skills/
 ├── skills/            # one folder per skill
 └── wiki/
     ├── docs/          # the website pages (docs_dir)
+    │   ├── threat-modeling/   # the Doors, Windows & Holes method
     │   └── threats/
     │       ├── business-logic/
     │       └── source-to-sink/
@@ -30,6 +31,9 @@ The pages are kept short, with these sections:
 - **Attack**: what the attacker does and the usual ways the control fails.
 - **Mitigation**: a checklist that holds for any stack. The skill relies on this
   when a project's stack has no examples yet, so keep it complete on its own.
+- **Test**: two bullets, **Point-in-time** (a check run once before release)
+  and **Continuous** (a test, rule or check that runs on every change). The
+  `threat-model` skill builds its testing plan from these.
 - **Examples**: tabs that include the per-stack files.
 
 See `wiki/docs/threats/business-logic/broken-object-level-authorization.md` for
