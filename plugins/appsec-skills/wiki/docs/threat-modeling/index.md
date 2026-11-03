@@ -7,8 +7,8 @@ feature, and ends with a testing plan instead of a document nobody reads.
 | Question | Step | What you write |
 |---|---|---|
 | What are we working on? | [1 · Scope and stories](#step-1-scope-and-stories) | How the system is meant to be used, as numbered sequence diagrams |
-| What can go wrong? | [2 · Doors, windows and holes](#step-2-doors-windows-and-holes) | Where input gets in, and where it can do damage |
-| What are we going to do about it? | [3 · Threats and mitigations](#step-3-threats-and-mitigations) | What must be true at each of those places |
+| | [2 · Doors, windows and holes](#step-2-doors-windows-and-holes) | Where input gets in, and where it can do damage |
+| What can go wrong, and what are we going to do about it? | [3 · Threats and mitigations](#step-3-threats-and-mitigations) | Each threat at those places, and what must be true to stop it |
 | Did we do a good job? | [4 · Testing plan](#step-4-testing-plan) | A test for each mitigation, run once or all the time |
 
 ## The three things to find
