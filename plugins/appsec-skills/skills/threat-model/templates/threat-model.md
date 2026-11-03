@@ -19,6 +19,10 @@ Two sentences on what the system does and where most of the risk sits.
 
 ## 1. Stories
 
+**What:** attendees buy tickets for events through Stripe Checkout.
+
+**How:**
+
 ### S1: Attendee buys a ticket
 
 ```mermaid
@@ -37,7 +41,6 @@ sequenceDiagram
 
 ## 2. General scope
 
-- **Goal:** attendees buy tickets through Stripe Checkout.
 - **Users and roles:** anonymous visitors, signed-in attendees, Stripe (webhook).
 - **Data:** attendee names and emails (PII); payment status. Card data stays on Stripe.
 - **Other assets:** ticket revenue, seat capacity.

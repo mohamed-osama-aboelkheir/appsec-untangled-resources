@@ -42,8 +42,9 @@ is what must be true, and **Test** feeds the testing plan.
 
 ## Step 1: Stories and scope
 
-Start with the **stories**: each way the system is meant to be used, as a
-sequence diagram with numbered steps, from the actor through every component to
+Start with **what**: the problem it solves, and for whom, in a sentence or
+two. Then **how**: the **stories**, each way the system is meant to be used,
+as a sequence diagram with numbered steps, from the actor through every component to
 the data store. In a design they come from the design doc; in code, from the
 README, the router, the infrastructure code and the UI. Name each story (`S1`,
 `S2`…) so later steps can point at "S3 · step 4". Add the log line each step
@@ -52,7 +53,6 @@ writes: it answers "would we know if this happened?".
 Then write the **general scope**: what isn't a door, window or hole but decides
 how bad a threat is.
 
-- What problem does it solve, and for whom?
 - Who are the users and roles (anonymous, signed-in, owner, admin, staff,
   support, third parties), and does it serve several organizations?
 - What data does it handle (PII, payments, secrets, private content), and
