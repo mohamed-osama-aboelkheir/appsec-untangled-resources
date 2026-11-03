@@ -77,13 +77,13 @@ Stories come first: the scope is built from them.
    "S3 · step 4". Keep to the stories the target needs; five to eight is
    typical for a system, one to three for a feature.
    - Code mode: derive them from the README, router, OpenAPI spec, IaC and UI.
-2. Build the **scope** from the stories, in short bullets: the problem and
-   goal; users and roles (anonymous, signed-in, owner, admin, staff, other
-   tenants, third parties); new or changed routes and pages; scheduled or
-   event-driven workflows; infrastructure and third-party services,
-   **including SaaS integrations**; data handled and credentials used. Every
-   item should appear in a story step. If the material names something no
-   story touches, add the missing story rather than listing it bare.
+2. Write the **general scope** in short bullets: the problem and goal; users
+   and roles (anonymous, signed-in, owner, admin, staff, other tenants, third
+   parties) and whether it serves several organizations; data handled and how
+   sensitive it is; other assets. Routes, services, credentials and sinks are
+   scope too, but step 2 lists them as doors, windows and holes. Everything
+   should appear in a story step: if the material names something no story
+   touches, add the missing story.
 
 ## Step 2: Doors, windows and holes (what are we working on?)
 
@@ -189,7 +189,7 @@ threats in the same group. Risk-accepted threats need no test.
    `${CLAUDE_PLUGIN_ROOT}/skills/threat-model/templates/threat-model.md`. The
    template is a shortened dummy example: keep its structure, replace the
    content, and write every group and threat, not an excerpt. It has a
-   summary, stories, scope, doors, windows and holes (grouped, with members),
+   summary, stories, general scope, doors, windows and holes (grouped, with members),
    threats **grouped by door, window or hole**, testing plan, open questions
    and assumptions. Use the `Mitigation kind` values from the schema as
    written. Link each threat to the wiki page or heading it came from; for a
