@@ -88,15 +88,25 @@ Walk each story step by step.
 1. **Doors**: every step where an actor hands the system input
    (`doors.md`). Record who is meant to use it, the input, the action and how
    sensitive it is, and the authentication.
-2. **Windows**: de-abstract every box in the diagram with the checklist in
-   `windows.md`: what is it really, who else can reach it, write to it or read
-   from it, and what credentials live in it or near it. Always cover compute
-   access (exec, roles, image push), queues and buckets, the identity
-   provider, secrets, CI/CD and IaC, admin tools, exported files and every SaaS
-   or OAuth integration.
+2. **Windows**, in two tiers:
+   - **Story windows** (model these fully): every box that appears in a
+     story, de-abstracted with the checklist in `windows.md`: what is it
+     really, who else can reach it, write to it or read from it, and what
+     credentials live in it or near it. This includes compute (exec, roles,
+     image push), queues, buckets, the identity provider, exported files and
+     every SaaS or OAuth integration a story touches.
+   - **Platform windows** (keep short): things no story step touches but that
+     reach everything, such as DNS and the registrar, the code repository and
+     CI/CD, infrastructure state, account-wide IAM, logs and SaaS
+     dashboards. For a whole system, put them in **one group** with one threat
+     per kind that matters. For a feature, include one only if the feature
+     changes it. Never let them outnumber the story windows.
 3. **Holes**: every step that stores, renders, runs, fetches or writes
    something input can reach, using the sink catalogue in `holes.md`. Record
-   the sink type and which inputs reach it.
+   the sink type and which inputs reach it. Tokens the system issues and
+   later checks (QR codes, unsubscribe links, reset tokens) are threats at
+   the door that receives them, not holes; make the parser a hole only when
+   parsing itself is the risk (a JWT library, a deserializer).
 4. **Group** them with the rule in `index.md` (same enforcement point, same
    rule, and for holes the same sink through the same function). Each group
    gets a name in business terms, its **Members** (every route, query, bucket
@@ -122,7 +132,10 @@ For each group:
   reaches it, a safe function, or validation or sanitization, in that order of
   preference.
 
-Write a threat only where the answer could be "yes, someone can". Every threat
+At every door that is not public by design, **start with the AuthN threat**,
+then the AuthZ threats, then the business rules, even when the design already
+names the control: the threat is what makes the control testable. After
+that, write a threat only where the answer could be "yes, someone can". Every threat
 has: **Who**, **What**, **Impact**, **Mitigation** (adapted from the wiki
 page's checklist to this system), **Mitigation kind**, the **library threat**
 (wiki page) it comes from, **Status**, **Severity**, and **Evidence**
@@ -130,10 +143,27 @@ page's checklist to this system), **Mitigation kind**, the **library threat**
 mode). For each group, list the pages ruled out in one line each
 ("CSRF: bearer token in a header, no cookies").
 
-**Budget**: about 10 to 25 threats for a feature and 40 to 60 for a whole
-system. If you are over, you have not grouped enough: merge groups that share
-the control, or merge threats on one group that share one mitigation. Never
-drop a high-severity threat to meet the budget.
+**Budget**: about 10 to 25 threats for a feature and 30 to 50 for a whole
+system, with doors and holes taking most of them. If you are over, you have
+not grouped enough: merge groups that share the control, merge threats on one
+group that share one mitigation, or fold platform windows into one group.
+Never drop a high-severity threat to meet the budget.
+
+**Status in design mode**: ❓ Needs verification when the design is silent on
+the control; ❌ Missing only when the design draws the step and leaves the
+control out or contradicts it (a queue any role can send to, a check the
+diagram skips); ✅ only when the design states the control explicitly and you
+add a test for it.
+
+**Severity**, from who can do it and what they get:
+
+- **Critical**: anyone, or any signed-in user, gets code execution, cloud
+  credentials, the whole database, or money.
+- **High**: any signed-in user gets another user's data, tickets or actions;
+  or a cloud principal or pipeline gets broad access.
+- **Medium**: needs a privileged role or an unusual condition, or the impact
+  is limited to one record or to abuse (spam, holding stock).
+- **Low**: nuisance, or an impact the user mostly inflicts on themselves.
 
 In code mode, set the status from the code the way `secure-code-review` does:
 ✅ Mitigated, ⚠️ Partially mitigated, ❌ Missing, ❓ Needs verification. Look
@@ -157,7 +187,9 @@ threats in the same group. Risk-accepted threats need no test.
    content, and write every group and threat, not an excerpt. It has a
    summary, scope, stories, doors, windows and holes (grouped, with members),
    threats **grouped by door, window or hole**, testing plan, open questions
-   and assumptions.
+   and assumptions. Use the `Mitigation kind` values from the schema as
+   written. Link each threat to the wiki page or heading it came from; for a
+   sink with no page, link the `holes.md` sink catalogue.
 2. `<output>/threat-model.json`, matching
    `${CLAUDE_PLUGIN_ROOT}/skills/threat-model/references/threat-model.schema.json`.
    It is what feature mode reads next time and what step 6 pushes to Notion.
