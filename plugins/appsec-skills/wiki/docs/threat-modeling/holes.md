@@ -23,9 +23,13 @@ value were hostile?"
 | OS command | `exec`, `spawn`, image or video tools, shelling out to CLIs | — |
 | Deserialization | Pickle, Java serialization, YAML loaders, `eval`, `new Function` | — |
 | XML | XML or SVG uploads, SAML, office documents | — |
-| Tokens and codes you parse | QR payloads, JWTs, signed links: anyone can make one | — |
+| Token and document parsers | JWT libraries, QR or barcode decoders, file-format parsers: the parser itself mis-handles crafted input | — |
 | Logs | Names, queries and headers written to logs (fake lines, secrets in logs) | — |
 | Dependencies | Markdown renderers, PDF and image libraries, browser layers: their own sinks | — |
+
+Forged or reused tokens the system issues (QR codes, unsubscribe links) are
+bucket 1 threats at the door that receives them; see
+[What else must hold](business-rules.md#tokens-codes-and-links-you-issue).
 
 A sink without a wiki page is still a hole. Model it with the same three
 mitigation kinds below.

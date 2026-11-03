@@ -93,7 +93,7 @@ List every member in the group so nothing is lost, and say in one line why they
 are grouped.
 
 As a budget, a feature should come to about 10 to 25 threats and a whole system
-to about 40 to 60: enough to read and discuss in one meeting.
+to about 30 to 50: enough to read and discuss in one meeting.
 
 ## Step 3: Threats and mitigations
 

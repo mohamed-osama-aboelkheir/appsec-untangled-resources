@@ -5,7 +5,7 @@
 | **Mode** | design |
 | **Date** | 2026-11-02 |
 | **Source** | `docs/checkout-design.md` v3 |
-| **Counts** | 2 stories · 3 doors · 2 windows · 2 holes (7 groups) · 9 threats · 8 tests |
+| **Counts** | 2 stories · 7 groups (3 door, 2 window, 2 hole) covering 11 members · 9 threats · 8 tests |
 
 ## Summary
 
@@ -75,7 +75,7 @@ sequenceDiagram
 - **What:** changes the order ID in `GET /api/orders/:id`
 - **Impact:** reads other attendees' names, emails and amounts
 - **Mitigation:** load the order scoped to `user_id = caller`; same 404 for missing and not yours
-- **Kind:** access control check · **Library:** [Broken object-level authorization](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/broken-object-level-authorization/)
+- **Kind:** Access control check · **Library:** [Broken object-level authorization](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/broken-object-level-authorization/)
 - **Status:** ❓ Needs verification · **Severity:** High · **Evidence:** Assumption
 
 ### 🪟 W1: SQS `order-paid`
@@ -86,7 +86,7 @@ sequenceDiagram
 - **What:** sends an `OrderPaid` message for an unpaid order
 - **Impact:** real tickets issued without payment
 - **Mitigation:** queue policy allows only the API task role; the worker re-checks `orders.status = 'paid'`
-- **Kind:** platform / cloud config · **Library:** [Unintended writer or reader](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threat-modeling/windows/)
+- **Kind:** Platform / cloud config · **Library:** [Windows: queues, topics and event buses](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threat-modeling/windows/#queues-topics-and-event-buses)
 - **Status:** ❌ Missing · **Severity:** High · **Evidence:** design §4 shows no queue policy
 
 ### 🕳️ H1: SQL in the order store
@@ -97,17 +97,23 @@ sequenceDiagram
 - **What:** input changes the structure of a query
 - **Source → sink:** D1 `items[].ticketTypeId` → `ticketTypeStore.reserve`
 - **Mitigation:** parameterized queries only, no raw fragments
-- **Kind:** safe function · **Library:** [SQL injection](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/source-to-sink/sql-injection/)
+- **Kind:** Safe function · **Library:** [SQL injection](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/source-to-sink/sql-injection/)
 - **Status:** ❓ Needs verification · **Severity:** Critical · **Evidence:** Assumption
 
 ## 5. Testing plan
 
-| Test | Threats | When | Type | How |
-|---|---|---|---|---|
-| Q1 · Two-user order access | T1 | Point-in-time, continuous | Integration test | User B requests user A's order; expect 404 |
-| Q4 · Queue policy denies other roles | T4 | Point-in-time, continuous | Policy-as-code / IaC check | `SendMessage` as another role is denied |
-| Q7 · No string-built SQL | T7 | Continuous | SAST rule | Fails the build on raw or concatenated SQL |
+| Test | Threats | When | Type | How | Where it runs |
+|---|---|---|---|---|---|
+| Q1 · Two-user order access | T1 | Point-in-time, continuous | Integration test | User B requests user A's order; expect 404 | API integration suite in CI |
+| Q4 · Queue policy denies other roles | T4 | Point-in-time, continuous | Policy-as-code / IaC check | `SendMessage` as another role is denied | IaC pipeline |
+| Q7 · No string-built SQL | T7 | Continuous | SAST rule | Fails the build on raw or concatenated SQL | Semgrep in CI |
 
-## 6. Open questions
+## 6. Assumptions and open questions
+
+**Assumptions**
+
+- The worker trusts the queue message and does not re-read the order.
+
+**Open questions**
 
 1. Does the worker read the database, or trust the message only? (Decides T4.)
