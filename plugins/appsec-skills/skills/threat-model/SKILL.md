@@ -81,7 +81,7 @@ the one example file that matches the project's stack, when you reach it.
    "S3 · step 4". Keep to the stories the scope needs; five to eight is typical
    for a system, one to three for a feature.
 
-## Step 2: Doors, windows and holes (what can go wrong?)
+## Step 2: Doors, windows and holes (what are we working on?)
 
 Walk each story step by step.
 
@@ -108,7 +108,7 @@ In code mode, confirm groups from the code: the same middleware on the router,
 the same repository or query helper, the same IAM policy. A member that
 doesn't use the shared control is an outlier.
 
-## Step 3: Threats and mitigations (what are we going to do about it?)
+## Step 3: Threats and mitigations (what can go wrong, and what are we going to do about it?)
 
 For each group:
 
