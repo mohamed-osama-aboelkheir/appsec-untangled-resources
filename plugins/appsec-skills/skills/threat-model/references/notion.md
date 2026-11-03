@@ -92,11 +92,10 @@ Notion turns bare `name.name` into a web link.
 
 `Category` (🔓 Business logic or 💉 Source to sink, from the linked row's
 type), `Type`, `Gap`, `Open` and the `Wiki …` fields are formulas and
-rollups: don't set them. `Group` (for example
-`1 · 🔓 Business logic  ›  🚪 Create order`) is a formula too, built from the
-linked row; the **All threats** view groups by it, so business-logic threats
-come first, then source-to-sink, each under its door, window or hole. Always
-set `Door / window / hole`, or the threat lands in the "not linked yet" group.
+rollups: don't set them. **All threats** is grouped by `Door / window / hole`,
+so always set it. Create the door, window and hole rows in that order (doors,
+then windows, then holes), and tell the user to drag any new group into place:
+Notion sorts the groups by name and the API can't reorder them.
 
 **Testing plan**
 
