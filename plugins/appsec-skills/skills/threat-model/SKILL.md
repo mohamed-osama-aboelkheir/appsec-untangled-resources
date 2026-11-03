@@ -68,18 +68,19 @@ the one example file that matches the project's stack, when you reach it.
 
 ## Step 1: Stories and scope (what are we working on?)
 
-Stories come first: the scope is built from them.
+The problem and the stories come first: the scope is built from them.
 
-1. Write the **stories**: each way the system is meant to be used. For each,
-   a Mermaid `sequenceDiagram` with `autonumber`, from the actor through
-   every component to the data store, with a `Note` for the log line a step
+1. Write **what** and **how**. What: the problem and goal, in a sentence
+   or two. How: the **stories**, each way the system is meant to be used.
+   For each, a Mermaid `sequenceDiagram` with `autonumber`, from the actor
+   through every component to the data store, with a `Note` for the log line a step
    writes where it matters. Name them `S1`, `S2`… so later steps can cite
    "S3 · step 4". Keep to the stories the target needs; five to eight is
    typical for a system, one to three for a feature.
    - Code mode: derive them from the README, router, OpenAPI spec, IaC and UI.
-2. Write the **general scope** in short bullets: the problem and goal; users
-   and roles (anonymous, signed-in, owner, admin, staff, other tenants, third
-   parties) and whether it serves several organizations; data handled and how
+2. Write the **general scope** in short bullets: users and roles
+   (anonymous, signed-in, owner, admin, staff, other tenants, third parties)
+   and whether it serves several organizations; data handled and how
    sensitive it is; other assets. Routes, services, credentials and sinks are
    scope too, but step 2 lists them as doors, windows and holes. Everything
    should appear in a story step: if the material names something no story
