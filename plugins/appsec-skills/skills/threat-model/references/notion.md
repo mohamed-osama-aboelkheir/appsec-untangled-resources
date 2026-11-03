@@ -35,7 +35,14 @@ template. Stop and tell the user rather than guessing.
 ## 2. Fill the page text (Steps 1 and 2)
 
 Use targeted content updates (search and replace), never a full rewrite: the
-page holds the databases. Replace `{{Project name}}` in the first paragraph
+page holds the databases.
+
+**In iterative mode**, fill the page one stage at a time, so the user reviews
+it in Notion: stage 1 fills Step 1; stage 2 fills Step 2's text, its callouts
+and the Doors, windows & holes rows; stage 3 the Threats and Mitigations rows
+and the Step 1 callouts' threat names; stage 4 the Testing plan. When the user
+changes an earlier stage, update the rows already created; don't duplicate
+them. Replace `{{Project name}}` in the first paragraph
 and the page title.
 
 **Step 1 · Stories and scope**
@@ -57,7 +64,7 @@ the 🔘 placeholders) with one quoted line answering it, from `questions`:
 ```
 > ✅ <b>Yes.</b> Added 🚪 <b>Stripe webhook</b> with <b>Forged "payment succeeded" webhook</b> → <i>Verify Stripe-Signature over the raw body</i>.
 > ⛔ <b>No CSRF.</b> Mutating, but the token is a Bearer header the browser can't attach.
-> ⛔ <b>Not in scope.</b> The design doesn't cover redirects.
+> ➖ <b>Not in scope.</b> The design doesn't cover redirects.
 ```
 
 Name the door, window or hole added, then each threat → its mitigation. If
@@ -88,9 +95,9 @@ each in story order.
 
 - `Threat`: the title (What)
 - `Who`, `Impact`, `Notes`
-- `Door / window / hole`: the group's page URL (always one; the main view is
-  grouped by it)
-- `Source door`: source-to-sink threats only, the door the input comes from
+- `Door / window / hole`: the page URLs of every group in `groups` (at least
+  one; the main view is grouped by it, and a threat with several shows in each)
+- `Source door`: source-to-sink threats only, the doors in `sourceDoors`
 - `Library threat`: the library row's page URL
 - `Status`: `Not discussed`, `❓ Needs verification`, `❌ Missing`,
   `⚠️ Partially mitigated`, `✅ Mitigated`, `Risk accepted`
@@ -103,6 +110,9 @@ and the `Wiki …` fields are formulas and rollups: don't set them.
 
 - `Mitigation`: what must be true
 - `Threats`: the threat page URLs it stops
+
+Create mitigations before threats or after, but set the relation from one
+side only (it is two-way).
 - `Kind`: `No user input reaches it`, `Safe function`,
   `Validation / sanitization`, `Access control check`, `Business rule check`,
   `Platform / cloud config`, `Process`

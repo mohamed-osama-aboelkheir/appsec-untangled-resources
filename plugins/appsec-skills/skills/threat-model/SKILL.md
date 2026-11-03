@@ -1,6 +1,6 @@
 ---
 name: threat-model
-description: Builds a threat model with the Doors, Windows & Holes method from the AppSec Untangled wiki, for a design doc, a feature description, an architecture or a repository. Writes the problem and stories, answers the template's scope questions, groups doors (entry points), windows (hidden entry points) and holes (dangerous sinks), adds business-logic and source-to-sink threats with shared mitigations, and ends with a testing plan of point-in-time and continuous tests per mitigation. Outputs Markdown and JSON, and can fill the Notion threat model template. Use when asked to threat model a system, feature, design or repo.
+description: Builds a threat model with the Doors, Windows & Holes method from the AppSec Untangled wiki, for a design doc, a feature description, an architecture or a repository. Writes the problem and stories, answers the template's scope questions, groups doors (entry points), windows (hidden entry points) and holes (dangerous sinks), adds business-logic and source-to-sink threats with shared mitigations, and ends with a testing plan of point-in-time and continuous tests per mitigation. Runs in four stages with a user review after each (stories, doors/windows/holes, threats and mitigations, tests) unless asked for one shot. Outputs Markdown and JSON, and can fill the Notion threat model template. Use when asked to threat model a system, feature, design or repo.
 ---
 
 # Threat model (Doors, Windows & Holes)
@@ -23,13 +23,47 @@ acts on in one meeting, not a complete one.
     - **feature**: a change to a system that already has a model (a
       `threat-model.json` or a filled Notion template). Model only the delta,
       and add to existing groups where the new door, window or hole fits.
+- **Run** (optional): **iterative** (the default) or **one-shot**. See below.
 - **Notion page** (optional): the URL of a copy of the Notion threat model
   template to fill. See step 6.
 - **Output directory** (optional): defaults to `./threat-model/`.
 
 Ask the user only for what you can't derive: the goal, the users and roles,
 and anything about the deployment the material doesn't show. Ask once, in one
-message, then proceed with stated assumptions.
+message, then proceed with stated assumptions. A design's own "Assumptions"
+section is stated design, not your assumption.
+
+## Iterative or one-shot
+
+A mistake in an early step (a missing story, a wrong group) spreads into every
+later one, so by default the skill stops for review after each stage:
+
+| Stage | Steps | Ends with |
+|---|---|---|
+| 1 · Stories | Step 1 | Problem, stories, general scope and its two questions |
+| 2 · Doors, windows and holes | Step 2 | Every scope question answered, the groups |
+| 3 · Threats and mitigations | Step 3 | Threats, shared mitigations, ruled-out lines |
+| 4 · Tests | Step 4 | The testing plan, and the outputs complete |
+
+At the end of each stage:
+
+1. Write the outputs so far (step 5): `threat-model.md` with the sections
+   done, and `threat-model.json` with `system.stage` set to the stage just
+   finished and the later arrays empty. With a Notion page, fill that stage's
+   part of the page too (see `references/notion.md`).
+2. Reply with a short summary of the stage (counts, the assumptions you made,
+   what you're least sure of) and ask the user to review it: "Reply *go* to
+   continue, or tell me what to change."
+3. Stop. Don't start the next stage until the user replies.
+
+When the user asks for a change, apply it, then re-check the stages already
+done that depend on it (a new story can add a door; a merged group moves its
+threats) before you ask again. When the skill starts and the output directory
+already holds a `threat-model.json` whose stage isn't `complete`, offer to
+continue from the next stage.
+
+**One-shot**, when the user asks for it ("one shot", "no review", "all at
+once"): run all four stages without stopping and write the outputs once.
 
 ## Ground rules
 
@@ -83,9 +117,9 @@ The problem and the stories come first: everything else is built from them.
    `S1`, `S2`… so later steps can cite "S3 · step 4". Five to eight is typical
    for a system, one to three for a feature.
    - Code mode: derive them from the README, router, OpenAPI spec, IaC and UI.
-3. **General scope**, in short bullets: users and roles (and whether it
-   serves several organizations), data and how sensitive it is, other assets,
-   links. Answer the two general questions in `questions.md`.
+3. **General scope**, in short bullets: users and roles, whether it serves
+   several organizations, data and how sensitive it is, other assets, links.
+   Answer the general questions in `questions.md`.
 
 If the material names something no story touches, add the missing story
 rather than listing it bare.
@@ -99,17 +133,22 @@ Under each section, list what it covers (the routes, buckets, queries).
 1. **Doors**: every step where an actor hands the system input
    (`doors.md`). Record who is meant to use it, the input, and the
    authentication.
-2. **Windows**, in two tiers:
-   - **Story windows** (model these fully): every box in a story,
-     de-abstracted with the checklist in `windows.md`: what is it really, who
-     else can reach it, write to it or read from it, and what credentials live
-     in it or near it. Compute, queues, buckets, the identity provider,
-     exported files and every SaaS or OAuth integration a story touches.
-   - **Platform windows** (keep short): DNS and the registrar, the code
-     repository and CI/CD, infrastructure state, account-wide IAM, logs and
-     SaaS dashboards. For a whole system, put them in **one group**. For a
-     feature, include one only if the feature changes it. Never let them
-     outnumber the story windows.
+2. **Windows**: de-abstract every box in a story with the checklist in
+   `windows.md` (what is it really, who else can reach it, write to it or read
+   from it, what credentials live in it or near it), then sort what you find:
+   - **Trusted windows** get their own group and threats: the ones a story
+     step *relies on* to be true, so that writing to or reading from them
+     breaks the story. Typically the queue a worker trusts, the bucket that
+     holds customer files or serves the code, the identity provider whose
+     groups grant roles, the compute that holds the secrets, the file the
+     system exports and someone acts on.
+   - **Everything else** (the database's network exposure, the email
+     provider, DNS and the registrar, the repository and CI/CD, IaC state,
+     account-wide IAM, logs, a mobile client, SaaS dashboards) goes into
+     **one platform group** with at most one threat per kind that matters,
+     or into its `ruledOut` line. For a feature, include one only if the
+     feature changes it. Secrets get a window of their own only when no
+     trusted window holds them.
 3. **Holes**: every step that stores, renders, runs, fetches or writes
    something input can reach, using the sink catalogue in `holes.md`. Tokens
    the system issues and later checks (QR codes, unsubscribe links, reset
@@ -124,7 +163,8 @@ Under each section, list what it covers (the routes, buckets, queries).
 A yes answer adds the group (or a member to an existing one) and the threats
 the question lists. A question whose threat already exists elsewhere ("the
 organizer role is checked at the Cognito window") points at that threat
-instead of adding a second one.
+instead of adding a second one. Answer each question **yes**, **no** or
+**not in scope** (the material doesn't cover it), shown as ✅, ⛔ and ➖.
 
 In code mode, confirm groups from the code: the same middleware on the router,
 the same repository or query helper, the same IAM policy. A member that
@@ -140,14 +180,23 @@ For each group, starting from the threats step 2 added:
   often a cloud principal, a pipeline or a third party.
 - **Holes (category: source to sink)**: name the attack from the
   source-to-sink pages (or `holes.md` when no page exists), **trace it back to
-  a door** (`sourceDoor`), including through queues and stored data, and pick
-  the mitigation kind: no user input reaches it, a safe function, or
-  validation or sanitization, in that order of preference.
+  every door** its input enters through (`sourceDoors`), including through
+  queues and stored data, and pick the mitigation kind: no user input reaches
+  it, a safe function, or validation or sanitization, in that order of
+  preference.
 
-At every door that is not public by design, **start with the AuthN threat**,
-then the AuthZ threats, then the business rules, even when the design already
-names the control: the threat is what makes the control testable. After
-that, write a threat only where the answer could be "yes, someone can".
+**AuthN first.** Every door that is not public by design needs an AuthN
+threat, even when the design already names the control: the threat is what
+makes the control testable. Write **one AuthN threat per authentication
+mechanism** (the bearer-token middleware, the webhook signature, the QR
+signature), linked to every door that relies on it, not one per door. Then
+the AuthZ threats, then the business rules. After that, write a threat only
+where the answer could be "yes, someone can".
+
+**One threat, several doors.** Whenever the same attack is stopped by the
+same control at several doors or windows (AuthN, an audit log, a rate limit),
+write it once and link it to all of them (`groups`). In the Markdown, list
+it under the most sensitive of them, and add "also at …".
 
 Every threat has: a **title** that is the What, **Who**, **Impact**,
 **Category**, the **library threat** (wiki page) it comes from, **Status**,
@@ -155,32 +204,38 @@ Every threat has: a **title** that is the What, **Who**, **Impact**,
 
 **Mitigations** are their own list. Each says what must be true, adapted from
 the wiki page's checklist and the starting mitigation in `questions.md`, with
-its **kind**, **status** (`❓ Needs verification` in design mode unless the
-design states it) and **evidence**. When two threats are stopped by the same
+its **kind**, **status** and **evidence**. In design mode a mitigation is
+`📝 Planned` when the design states it, `❌ Missing` when the design draws the
+step without it or contradicts it, and `❓ Needs verification` otherwise. When two threats are stopped by the same
 control (one owner check on two routes), they share one mitigation; don't
 write it twice.
 
 For each group, list the pages ruled out in one line each ("CSRF: bearer
 token in a header, no cookies").
 
-**Budget**: about 10 to 25 threats for a feature and 30 to 50 for a whole
+**Budget**: about 10 to 25 threats for a feature and 30 to 40 for a whole
 system, with doors and holes taking most of them. If you are over, you have
-not grouped enough: merge groups that share the control, merge threats on one
-group that share one mitigation, or fold platform windows into one group.
-Never drop a high-severity threat to meet the budget.
+not grouped enough: merge groups that share the control, write one threat for
+the same attack at several doors, merge threats on one group that share one
+mitigation, or move windows nothing trusts into the platform group. Never
+drop a high-severity threat to meet the budget.
 
-**Threat status in design mode**: ❓ Needs verification when the design is
-silent on the control; ❌ Missing only when the design draws the step and
-leaves the control out or contradicts it (a queue any role can send to, a
-check the diagram skips); ✅ Mitigated only when the design states the control
-explicitly and it has a test.
+**Threat status**: ✅ Mitigated **only when a test of its mitigation has
+passed** (so never in design mode, where nothing has run). Otherwise take the
+worst of its mitigations: any `❌ Missing` makes the threat ❌ Missing, any
+`⚠️ Partial` makes it ⚠️ Partially mitigated, and the rest is ❓ Needs
+verification. In design mode, mark a mitigation ❌ only when the diagram shows
+the dangerous step itself (a queue any role can send to, a render step with
+no sanitizer), not merely because a sketch leaves a control out.
 
 **Severity**, from who can do it and what they get:
 
-- **Critical**: anyone, or any signed-in user, gets code execution, cloud
-  credentials, the whole database, or money.
-- **High**: any signed-in user gets another user's data, tickets or actions;
-  or a cloud principal or pipeline gets broad access.
+- **Critical**: needs no role beyond a free sign-up, and gets code execution,
+  cloud credentials, the whole database, or money at scale (free tickets for
+  everyone, not one cheap order).
+- **High**: any signed-in user gets another user's data, tickets or actions,
+  or money on their own orders; or a cloud principal or pipeline gets broad
+  access.
 - **Medium**: needs a privileged role or an unusual condition, or the impact
   is limited to one record or to abuse (spam, holding stock).
 - **Low**: nuisance, or an impact the user mostly inflicts on themselves.
@@ -192,17 +247,25 @@ before marking it missing.
 
 ## Step 4: Testing plan (did we do a good job?)
 
-Every mitigation gets at least one test that would fail if the mitigation
-were missing, from the threat page's **Test** section and `testing-plan.md`.
-Each test has one **type**, **Point-in-time** (once, before release) or
+Every mitigation gets **one test** that would fail if the mitigation were
+missing, from the threat page's **Test** section and `testing-plan.md`. Each
+test has one **type**, **Point-in-time** (once, before release) or
 **Continuous** (every change or on a schedule), and a **kind** (code review,
 config review, dynamic test (Burp), pen test, unit, integration,
 concurrency, SAST rule, policy-as-code, dependency scan, monitoring, other).
-A mitigation usually gets one of each type: check it now, then keep it true.
-Write **How** (what to send or check, and what must happen to pass) and
-**Where it runs**. Risk-accepted threats need no test.
+Pick the type that fits: continuous for controls in code and config that
+change, point-in-time for things checked once.
+
+Add a **second test of the other type** only when the mitigation stops a
+Critical threat, or a High threat whose control lives in application code
+that changes often (route handlers, middleware, query code): check it now,
+then keep it true. Write **How** (what to send or check, and what must happen
+to pass) and **Where it runs**. Risk-accepted threats need no test.
 
 ## Step 5: Write the outputs
+
+In iterative mode, write them at the end of every stage with what is done so
+far; in one-shot mode, once at the end.
 
 1. `<output>/threat-model.md`, following
    `${CLAUDE_PLUGIN_ROOT}/skills/threat-model/templates/threat-model.md`. The
@@ -226,6 +289,8 @@ in feature mode add rows instead of duplicating existing ones.
 
 ## Reply
 
-Reply with: the counts (stories, doors, windows, holes, threats, mitigations,
+In iterative mode, after stages 1 to 3 reply with the stage summary and the
+review request (see above). After the last stage, or in one-shot mode, reply
+with: the counts (stories, doors, windows, holes, threats, mitigations,
 tests), the threats that are ❌ Missing or ⚠️ Partial with their severity, the
 open questions, and the output paths or Notion link.
