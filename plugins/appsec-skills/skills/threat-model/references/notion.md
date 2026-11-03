@@ -92,9 +92,11 @@ Notion turns bare `name.name` into a web link.
 
 `Category` (🔓 Business logic or 💉 Source to sink, from the linked row's
 type), `Type`, `Gap`, `Open` and the `Wiki …` fields are formulas and
-rollups: don't set them. The Threats tabs group by `Category` first and the
-door, window or hole second, so a threat with no `Door / window / hole`
-shows only in **Not discussed**.
+rollups: don't set them. `Group` (for example
+`1 · 🔓 Business logic  ›  🚪 Create order`) is a formula too, built from the
+linked row; the **All threats** view groups by it, so business-logic threats
+come first, then source-to-sink, each under its door, window or hole. Always
+set `Door / window / hole`, or the threat lands in the "not linked yet" group.
 
 **Testing plan**
 
