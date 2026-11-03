@@ -55,6 +55,8 @@ Notion turns bare `name.name` into a web link.
 
 - `Name`: the group name in business terms
 - `Type`: exactly `🚪 Door`, `🪟 Window` or `🕳️ Hole`
+- Page icon: the same emoji as `Type` (🚪, 🪟 or 🕳️), so the row is easy to
+  spot wherever it is linked
 - `Members`, `Grouped because`, `Component`, `Story steps` (`S3 · step 2, S4 · step 1`)
 - `Stories`: the story page URLs
 - `Who can reach it` (multi-select): `Anonymous`, `Any signed-in user`,
@@ -88,8 +90,11 @@ Notion turns bare `name.name` into a web link.
   (design mode: usually `❓ Needs verification`)
 - `Severity`: `Critical`, `High`, `Medium`, `Low`
 
-`Bucket`, `Type`, `Gap`, `Open` and the `Wiki …` fields are formulas and
-rollups: don't set them.
+`Category` (🔓 Business logic or 💉 Source to sink, from the linked row's
+type), `Type`, `Gap`, `Open` and the `Wiki …` fields are formulas and
+rollups: don't set them. The Threats tabs group by `Category` first and the
+door, window or hole second, so a threat with no `Door / window / hole`
+shows only in **Not discussed**.
 
 **Testing plan**
 
