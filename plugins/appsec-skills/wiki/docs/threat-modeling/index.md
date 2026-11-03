@@ -125,28 +125,31 @@ Every threat has:
   user, another tenant, an AWS principal with `sqs:SendMessage`).
 - **What**: the attack, in one sentence.
 - **Impact**: what happens if it works, in business terms.
-- **Mitigation**: what must be true, taken from the wiki page and adapted to the
-  system. For bucket 2, name the kind: no user input, safe function, or
-  validation or sanitization.
+- **Mitigations**: what must be true, taken from the wiki page and adapted to
+  the system. One mitigation often stops several threats, so mitigations are
+  written once and linked. For bucket 2, name the kind: no user input, safe
+  function, or validation or sanitization. Add **evidence** (`path:line`)
+  when there is code.
 - **Status**: ✅ Mitigated · ⚠️ Partially mitigated · ❌ Missing ·
   ❓ Needs verification · Risk accepted. In a design, most start as ❓.
-- **Severity**, and **evidence** (`path:line`) when there is code.
+- **Severity**.
 
 ## Step 4: Testing plan
 
 Every mitigation gets a test that would fail if the mitigation were missing.
 A test is **point-in-time** (run once before release: a manual check, a code or
-config review, a DAST run), **continuous** (runs on every change or on a
-schedule: unit and integration tests, SAST rules, policy checks, alerts), or
-both. See [Testing plan](testing-plan.md).
+config review, a dynamic test) or **continuous** (runs on every change or on a
+schedule: unit and integration tests, SAST rules, policy checks, alerts); most
+mitigations get one of each. See [Testing plan](testing-plan.md).
 
 The model is done when every threat is either mitigated with a passing test, or
 explicitly accepted.
 
 ## Using it
 
-- By hand: the Notion template follows the same four steps, with a database
-  for stories, one for doors, windows and holes, one for threats and one for
-  the testing plan.
+- By hand: the Notion template follows the same four steps. Steps 1 and 2 are
+  page text with a question under each scope section that adds the matching
+  door, window or hole and its threats; then databases for doors, windows and
+  holes, threats, mitigations and the testing plan.
 - With Claude Code: the `threat-model` skill runs the same steps over a design
   doc, a feature description or a repository, and can fill the Notion template.
