@@ -13,8 +13,8 @@ were missing**. A threat with a mitigation and no test is a claim.
   integration tests in CI, SAST rules, policy-as-code checks on infrastructure,
   dependency scanning, alerts on suspicious behaviour.
 
-Most mitigations deserve both: check it once now, then add a test so it stays
-true. A one-off check is enough when the thing it checks rarely changes and
+Each test is one or the other. Most mitigations get one of each: check it
+once now, then add a test so it stays true. A one-off check is enough when the thing it checks rarely changes and
 would be reviewed anyway (a registrar lock, MFA on the payment dashboard).
 
 ## Pick the test
@@ -34,16 +34,20 @@ continuous test for that threat.
 
 ## What to write for each test
 
-- The **threats** it covers (one test can cover several in the same group).
-- **When**: point-in-time, continuous, or both.
-- **Type**: unit, integration, code review, config review, DAST, SAST rule,
-  policy check, monitoring.
+- The **mitigations** it tests (one test can cover several mitigations in the
+  same group). Tests belong to mitigations, not threats: one mitigation often
+  stops several threats.
+- **Type**: point-in-time or continuous.
+- **Kind**: code review, config review, dynamic test (Burp), pen test, unit,
+  integration, concurrency, SAST rule, policy-as-code, dependency scan,
+  monitoring, other.
+- **How**: what to send or check, and what must happen to pass.
 - **Where it runs**: the CI job, the scheduled check, or the person who runs it.
 - **Status** and **last run**.
 
 ## Done
 
 - Every threat is mitigated or explicitly accepted.
-- Every mitigated threat has at least one test, and its point-in-time tests
-  have passed.
+- Every mitigation has at least one test, and its point-in-time tests have
+  passed.
 - Every continuous test is in CI or scheduled, with an owner.

@@ -3,44 +3,64 @@
   "$id": "https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threat-model.schema.json",
   "title": "Doors, Windows & Holes threat model",
   "type": "object",
-  "required": ["system", "stories", "groups", "threats", "tests"],
+  "required": ["system", "stories", "questions", "groups", "threats", "mitigations", "tests"],
   "additionalProperties": false,
   "properties": {
     "system": {
       "type": "object",
-      "required": ["name", "mode", "date"],
+      "required": ["name", "mode", "date", "problem"],
       "additionalProperties": false,
       "properties": {
         "name": { "type": "string" },
         "mode": { "enum": ["design", "code", "feature"] },
         "date": { "type": "string", "format": "date" },
         "version": { "type": "string", "description": "Commit SHA in code mode, document version in design mode" },
-        "goal": { "type": "string" },
+        "problem": { "type": "string", "description": "What: the problem the system solves, in a sentence or two" },
         "roles": { "type": "array", "items": { "type": "string" } },
-        "scope": { "type": "array", "items": { "type": "string" } },
+        "multiTenant": { "type": "boolean" },
         "data": { "type": "array", "items": { "type": "string" } },
-        "components": { "type": "array", "items": { "type": "string" } },
+        "assets": { "type": "array", "items": { "type": "string" } },
+        "links": { "type": "array", "items": { "type": "string" } },
         "assumptions": { "type": "array", "items": { "type": "string" } },
         "openQuestions": { "type": "array", "items": { "type": "string" } }
       }
     },
     "stories": {
+      "description": "How: each way the system is meant to be used",
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "title", "actor", "diagram"],
+        "required": ["id", "title", "summary", "diagram"],
         "additionalProperties": false,
         "properties": {
           "id": { "type": "string", "pattern": "^S[0-9]+$" },
           "title": { "type": "string" },
-          "actor": { "type": "string" },
           "summary": { "type": "string" },
           "diagram": { "type": "string", "description": "Mermaid sequenceDiagram with autonumber" }
         }
       }
     },
+    "questions": {
+      "description": "Every question in references/questions.md, answered, in that order",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["section", "topic", "question", "answer", "note"],
+        "additionalProperties": false,
+        "properties": {
+          "section": { "enum": ["general", "doors", "windows", "holes"] },
+          "topic": { "type": "string", "description": "The heading it sits under, for example Backend routes" },
+          "question": { "type": "string" },
+          "answer": { "enum": ["yes", "no", "not in scope"] },
+          "note": { "type": "string", "description": "Yes: what was added. No or not in scope: why, in one line" },
+          "items": { "type": "array", "items": { "type": "string" }, "description": "What the section lists: routes, buckets, queries" },
+          "groups": { "type": "array", "items": { "type": "string" }, "description": "Group ids this answer added or extended" },
+          "threats": { "type": "array", "items": { "type": "string" }, "description": "Threat ids this answer added or that already cover it" }
+        }
+      }
+    },
     "groups": {
-      "description": "Doors, windows and holes, one entry per group that shares threats and mitigations",
+      "description": "Doors, windows and holes, one entry per group that shares threats and mitigations, ordered doors, then windows, then holes",
       "type": "array",
       "items": {
         "type": "object",
@@ -63,10 +83,10 @@
           "authentication": { "type": "string" },
           "inputOrExposure": { "type": "string" },
           "windowKind": {
-            "enum": ["Compute", "Queue / event bus", "Object storage", "Database / cache", "Identity provider", "DNS / CDN / load balancer", "Secrets and keys", "SaaS / OAuth integration", "Repo / CI/CD / IaC", "Admin tool", "Exported file", "Email / SMS provider", "Scheduler", "Mobile / desktop app", "Logs / monitoring", "Other"]
+            "enum": ["Compute", "Queue / event bus", "Object storage", "Database / cache", "Identity provider", "DNS / CDN / load balancer", "Secrets and keys", "SaaS / OAuth integration", "Repo / CI/CD / IaC", "Admin tool", "Exported file", "Email / SMS provider", "Scheduler", "Mobile / desktop app", "Logs / monitoring", "Platform (several)", "Other"]
           },
           "sinkType": {
-            "enum": ["SQL", "NoSQL", "HTML / DOM", "Template", "Outbound URL", "Redirect", "File path / object key", "Client-side request path", "HTML → PDF", "CSV / spreadsheet", "Email body / headers", "OS command", "Deserialization", "XML", "Token / QR parsing", "Logs", "Dependency", "Other"]
+            "enum": ["SQL", "NoSQL", "HTML / DOM", "Template", "Outbound URL", "Redirect", "File path / object key", "Client-side request path", "HTML → PDF", "CSV / spreadsheet", "Email body / headers", "OS command", "Deserialization", "XML", "Parser", "Logs", "Dependency", "Other"]
           },
           "ruledOut": {
             "description": "Threats considered and not applicable, one line each",
@@ -80,28 +100,42 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "group", "title", "who", "what", "impact", "mitigation", "status"],
+        "required": ["id", "group", "category", "title", "who", "impact", "mitigations", "status", "severity"],
         "additionalProperties": false,
         "properties": {
           "id": { "type": "string", "pattern": "^T[0-9]+$" },
           "group": { "type": "string", "description": "id of the door, window or hole group" },
-          "sourceDoor": { "type": "string", "description": "Bucket 2: id of the door group the input enters through" },
-          "bucket": { "enum": ["business-logic", "source-to-sink"] },
+          "sourceDoor": { "type": "string", "description": "Source to sink: id of the door group the input enters through" },
+          "category": { "enum": ["business-logic", "source-to-sink"], "description": "business-logic at doors and windows, source-to-sink at holes" },
           "libraryThreat": { "type": "string", "description": "Wiki page, for example threats/business-logic/broken-object-level-authorization or threat-modeling/business-rules#race-conditions" },
-          "title": { "type": "string" },
-          "who": { "type": "string" },
-          "what": { "type": "string" },
-          "impact": { "type": "string" },
-          "mitigation": { "type": "string" },
-          "mitigationKind": {
-            "enum": ["No user input reaches it", "Safe function", "Validation / sanitization", "Access control check", "Business rule check", "Platform / cloud config", "Process"]
-          },
+          "title": { "type": "string", "description": "What: the attack, in one short sentence" },
+          "who": { "type": "string", "description": "The attacker and what they need first" },
+          "impact": { "type": "string", "description": "What happens if it works, in business terms" },
+          "mitigations": { "type": "array", "items": { "type": "string", "pattern": "^M[0-9]+$" }, "description": "Empty only when Risk accepted" },
           "status": {
             "enum": ["Not discussed", "❓ Needs verification", "❌ Missing", "⚠️ Partially mitigated", "✅ Mitigated", "Risk accepted"]
           },
           "severity": { "enum": ["Critical", "High", "Medium", "Low"] },
-          "evidence": { "type": "string", "description": "path:line in code mode, design reference or 'Assumption' in design mode" },
           "notes": { "type": "string" }
+        }
+      }
+    },
+    "mitigations": {
+      "description": "What must be true. One mitigation can stop several threats",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "threats", "kind", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^M[0-9]+$" },
+          "title": { "type": "string", "description": "What must be true, adapted to this system" },
+          "threats": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "kind": {
+            "enum": ["No user input reaches it", "Safe function", "Validation / sanitization", "Access control check", "Business rule check", "Platform / cloud config", "Process"]
+          },
+          "status": { "enum": ["❓ Needs verification", "📝 Planned", "✅ In place", "⚠️ Partial", "❌ Missing"] },
+          "evidence": { "type": "string", "description": "path:line in code mode, design reference or 'Assumption' in design mode" }
         }
       }
     },
@@ -109,17 +143,17 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "title", "threats", "when", "type"],
+        "required": ["id", "title", "mitigations", "type", "kind", "how"],
         "additionalProperties": false,
         "properties": {
           "id": { "type": "string", "pattern": "^Q[0-9]+$" },
           "title": { "type": "string" },
-          "threats": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-          "when": { "type": "array", "items": { "enum": ["Point-in-time", "Continuous"] }, "minItems": 1 },
-          "type": {
-            "enum": ["Unit test", "Integration test", "Concurrency / load test", "Code review", "Config review", "DAST / manual request", "Pen test", "SAST rule", "Policy-as-code / IaC check", "Dependency scan", "Monitoring / alert"]
+          "mitigations": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "type": { "enum": ["Point-in-time", "Continuous"] },
+          "kind": {
+            "enum": ["Code review", "Config review", "Dynamic test (Burp)", "Pen test", "Unit test", "Integration test", "Concurrency / load test", "SAST rule", "Policy-as-code / IaC check", "Dependency scan", "Monitoring / alert", "Other"]
           },
-          "how": { "type": "string" },
+          "how": { "type": "string", "description": "What it does, and what must happen to pass" },
           "whereItRuns": { "type": "string" },
           "status": { "enum": ["Not started", "In progress", "✅ Passing", "❌ Failing", "Blocked"] }
         }
