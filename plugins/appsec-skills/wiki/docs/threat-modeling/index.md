@@ -6,7 +6,7 @@ feature, and ends with a testing plan instead of a document nobody reads.
 
 | Question | Step | What you write |
 |---|---|---|
-| What are we working on? | [1 · Scope and stories](#step-1-scope-and-stories) | How the system is meant to be used, as numbered sequence diagrams |
+| What are we working on? | [1 · Stories and scope](#step-1-stories-and-scope) | How the system is meant to be used, as numbered sequence diagrams, and the scope they add up to |
 | | [2 · Doors, windows and holes](#step-2-doors-windows-and-holes) | Where input gets in, and where it can do damage |
 | What can go wrong, and what are we going to do about it? | [3 · Threats and mitigations](#step-3-threats-and-mitigations) | Each threat at those places, and what must be true to stop it |
 | Did we do a good job? | [4 · Testing plan](#step-4-testing-plan) | A test for each mitigation, run once or all the time |
@@ -40,24 +40,25 @@ The wiki's [business-logic](../threats/business-logic/index.md) and
 Each page's **When is it relevant** decides whether it applies, **Mitigation**
 is what must be true, and **Test** feeds the testing plan.
 
-## Step 1: Scope and stories
+## Step 1: Stories and scope
 
-Answer these first. In a design they come from the design doc; in code, from
-the README, the router, the infrastructure code and the UI.
+Start with the **stories**: each way the system is meant to be used, as a
+sequence diagram with numbered steps, from the actor through every component to
+the data store. In a design they come from the design doc; in code, from the
+README, the router, the infrastructure code and the UI. Name each story (`S1`,
+`S2`…) so later steps can point at "S3 · step 4". Add the log line each step
+writes: it answers "would we know if this happened?".
+
+Then build the **scope** from the stories. Everything a story touches is in
+scope; anything the scope needs that no story touches means a story is missing.
 
 - What problem does it solve, and for whom? Who are the users and roles
   (anonymous, signed-in, owner, admin, staff, other tenants, third parties)?
-- What is in scope: new and changed routes, pages, scheduled or event-driven
-  workflows, infrastructure, third-party services?
-- What data does it handle (PII, payments, secrets, private content), and
-  which credentials does it introduce or use?
-- Which components does it run on, and which services does it call?
-
-Then write the **stories**: each way the system is meant to be used, as a
-sequence diagram with numbered steps, from the actor through every component to
-the data store. Name each story (`S1`, `S2`…) so later steps can point at
-"S3 · step 4". Add the log line each step writes: it answers "would we know if
-this happened?".
+- Which new and changed routes, pages, scheduled or event-driven workflows,
+  infrastructure and third-party services do the stories use?
+- What data do they handle (PII, payments, secrets, private content), and
+  which credentials do they introduce or use?
+- Which components do they run on, and which services do they call?
 
 ## Step 2: Doors, windows and holes
 

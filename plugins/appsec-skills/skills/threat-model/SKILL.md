@@ -66,20 +66,24 @@ Don't read `wiki/examples/` in design mode. In code mode, follow the
 `secure-code-review` skill's rule: for a threat you are checking, read only
 the one example file that matches the project's stack, when you reach it.
 
-## Step 1: Scope and stories (what are we working on?)
+## Step 1: Stories and scope (what are we working on?)
 
-1. Write the scope in short bullets: the problem and goal; users and roles
-   (anonymous, signed-in, owner, admin, staff, other tenants, third parties);
-   new or changed routes and pages; scheduled or event-driven workflows;
-   infrastructure and third-party services, **including SaaS integrations**;
-   data handled and credentials used.
-   - Code mode: derive from the README, router, OpenAPI spec, IaC and UI.
-2. Write the **stories**: each way the system is meant to be used. For each,
+Stories come first: the scope is built from them.
+
+1. Write the **stories**: each way the system is meant to be used. For each,
    a Mermaid `sequenceDiagram` with `autonumber`, from the actor through
    every component to the data store, with a `Note` for the log line a step
    writes where it matters. Name them `S1`, `S2`… so later steps can cite
-   "S3 · step 4". Keep to the stories the scope needs; five to eight is typical
-   for a system, one to three for a feature.
+   "S3 · step 4". Keep to the stories the target needs; five to eight is
+   typical for a system, one to three for a feature.
+   - Code mode: derive them from the README, router, OpenAPI spec, IaC and UI.
+2. Build the **scope** from the stories, in short bullets: the problem and
+   goal; users and roles (anonymous, signed-in, owner, admin, staff, other
+   tenants, third parties); new or changed routes and pages; scheduled or
+   event-driven workflows; infrastructure and third-party services,
+   **including SaaS integrations**; data handled and credentials used. Every
+   item should appear in a story step. If the material names something no
+   story touches, add the missing story rather than listing it bare.
 
 ## Step 2: Doors, windows and holes (what are we working on?)
 
@@ -185,7 +189,7 @@ threats in the same group. Risk-accepted threats need no test.
    `${CLAUDE_PLUGIN_ROOT}/skills/threat-model/templates/threat-model.md`. The
    template is a shortened dummy example: keep its structure, replace the
    content, and write every group and threat, not an excerpt. It has a
-   summary, scope, stories, doors, windows and holes (grouped, with members),
+   summary, stories, scope, doors, windows and holes (grouped, with members),
    threats **grouped by door, window or hole**, testing plan, open questions
    and assumptions. Use the `Mitigation kind` values from the schema as
    written. Link each threat to the wiki page or heading it came from; for a

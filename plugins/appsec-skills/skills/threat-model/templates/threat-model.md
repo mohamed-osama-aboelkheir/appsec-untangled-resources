@@ -17,15 +17,7 @@ Two sentences on what the system does and where most of the risk sits.
 | ⚠️ Partially mitigated | — |
 | ❓ Needs verification | T1, T2, T3, T5, T6, T7, T8, T9 |
 
-## 1. Scope
-
-- **Goal:** attendees buy tickets through Stripe Checkout.
-- **Users and roles:** anonymous visitors, signed-in attendees, Stripe (webhook).
-- **In scope:** `POST /api/orders`, `GET /api/orders/:id`, `POST /api/webhooks/stripe`, SQS `order-paid`.
-- **Data and credentials:** attendee names and emails; Stripe secret key, webhook secret.
-- **Assumptions:** the API uses a bearer token in the `Authorization` header, not cookies.
-
-## 2. Stories
+## 1. Stories
 
 ### S1: Attendee buys a ticket
 
@@ -42,6 +34,14 @@ sequenceDiagram
     S->>API: Payment completed (webhook)
     Note over API: INFO order.paid order_id=… tickets=2
 ```
+
+## 2. Scope
+
+- **Goal:** attendees buy tickets through Stripe Checkout.
+- **Users and roles:** anonymous visitors, signed-in attendees, Stripe (webhook).
+- **In scope:** `POST /api/orders`, `GET /api/orders/:id`, `POST /api/webhooks/stripe`, SQS `order-paid`.
+- **Data and credentials:** attendee names and emails; Stripe secret key, webhook secret.
+- **Assumptions:** the API uses a bearer token in the `Authorization` header, not cookies.
 
 ## 3. Doors, windows and holes
 
