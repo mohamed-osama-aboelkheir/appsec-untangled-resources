@@ -37,8 +37,8 @@ mitigation kinds below.
 ## Trace it back to a door
 
 For each hole, name the attack and trace the input back to where it entered:
-"`attendees[].name` from `POST /api/orders` (S4 · step 1) → queue → ticket
-Lambda → PDF template (S5 · step 2)". The source is often far from the sink,
+"`attendees[].name` from `POST /api/orders` (S3 · step 1) → queue → ticket
+Lambda → PDF template (S4 · step 2)". The source is often far from the sink,
 and often **stored**: one user writes it, another user's request renders it.
 Input that travels through queues, files or the database is still user input.
 

@@ -111,7 +111,7 @@ List every member in the group so nothing is lost, and say in one line why they
 are grouped.
 
 As a budget, a feature should come to about 10 to 25 threats and a whole system
-to about 30 to 50: enough to read and discuss in one meeting.
+to about 30 to 40: enough to read and discuss in one meeting.
 
 ## Step 3: Threats and mitigations
 
@@ -139,8 +139,9 @@ Every threat has:
 Every mitigation gets a test that would fail if the mitigation were missing.
 A test is **point-in-time** (run once before release: a manual check, a code or
 config review, a dynamic test) or **continuous** (runs on every change or on a
-schedule: unit and integration tests, SAST rules, policy checks, alerts); most
-mitigations get one of each. See [Testing plan](testing-plan.md).
+schedule: unit and integration tests, SAST rules, policy checks, alerts). One
+test per mitigation is the default; add one of the other type for critical
+threats and for controls in code that changes often. See [Testing plan](testing-plan.md).
 
 The model is done when every threat is either mitigated with a passing test, or
 explicitly accepted.
