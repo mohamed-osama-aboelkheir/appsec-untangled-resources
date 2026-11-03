@@ -13,9 +13,12 @@ were missing**. A threat with a mitigation and no test is a claim.
   integration tests in CI, SAST rules, policy-as-code checks on infrastructure,
   dependency scanning, alerts on suspicious behaviour.
 
-Each test is one or the other. Most mitigations get one of each: check it
-once now, then add a test so it stays true. A one-off check is enough when the thing it checks rarely changes and
-would be reviewed anyway (a registrar lock, MFA on the payment dashboard).
+Each test is one or the other, and one test per mitigation is the default:
+continuous for controls in code and configuration that change, point-in-time
+for things checked once and rarely changed (a registrar lock, MFA on the
+payment dashboard). Add a second test of the other type for mitigations that
+stop a critical threat, or a high one whose control lives in code that changes
+often: check it once now, then keep it true.
 
 ## Pick the test
 
