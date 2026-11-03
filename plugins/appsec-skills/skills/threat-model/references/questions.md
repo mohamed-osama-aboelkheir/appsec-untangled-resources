@@ -9,6 +9,8 @@ order. Answer every one, from the stories and the material you were given.
 - **No**: say why in one line ("bearer token in a header, no cookies").
 - **Not in scope**: the material doesn't cover it. Say so; don't invent it.
 
+Show them as ✅ yes, ⛔ no and ➖ not in scope.
+
 Each threat names its wiki page (bucket 1 under `threats/business-logic/`,
 bucket 2 under `threats/source-to-sink/`, or a `threat-modeling/` page).
 Read that page's **When is it relevant** before answering yes, and its
@@ -18,7 +20,8 @@ Read that page's **When is it relevant** before answering yes, and its
 
 | Section | Question | If yes |
 |---|---|---|
-| Target users and roles | Who are the roles, and does the app serve several organizations, companies or workspaces from shared code or data? | Write the roles. Several organizations: ask the tenant question at every door that reads tenant data |
+| Target users and roles | Who are the roles (anonymous, signed-in, owner, admin, staff, support, third parties)? | Write the roles: the authorization questions ask which of them may call each door |
+| Target users and roles | Does the app serve several organizations, companies or workspaces from shared code or data? | Ask the tenant question at every door that reads tenant data |
 | Data handled or stored | Is any of it sensitive: PII, payments, health, secrets, private content? | Mark it; it sets severity |
 
 ## Step 2 · 🚪 Doors
@@ -26,7 +29,7 @@ Read that page's **When is it relevant** before answering yes, and its
 | Section | Question | If yes, add | Starting mitigation |
 |---|---|---|---|
 | Backend routes | Are there new or changed backend routes? | 🚪 one door per group of routes behind the same middleware with the same rule; split outliers | — |
-| Backend routes | Should only known callers reach them (not public by design)? | Authentication (`broken-authentication`) | Every route behind the auth middleware, which checks signature, issuer, audience, expiry; public routes are an explicit allowlist |
+| Backend routes | Should only known callers reach them (not public by design)? | Authentication (`broken-authentication`): one threat per auth mechanism, linked to every door that uses it | Every route behind the auth middleware, which checks signature, issuer, audience, expiry; public routes are an explicit allowlist |
 | Backend routes | Only allowed for specific users or roles? | Function-level authorization (`broken-function-level-authorization`) | Role or permission check on every route, deny by default |
 | Backend routes | Do they take a resource ID and read, change or delete it? | IDOR (`broken-object-level-authorization`) | Load every record scoped to the caller; same 404 for missing and not yours |
 | Backend routes | Do they serve several organizations? | Tenant isolation (`broken-tenant-isolation`) | Tenant from the session, never the request; every query filtered by it |
@@ -48,18 +51,18 @@ Read that page's **When is it relevant** before answering yes, and its
 | Queues, topics, schedulers | Can anyone besides the intended producer send the event? Delivered twice? | 🪟 window, Unauthorized write access, Replay | Queue policy allows only the producer; consumer re-checks state in the database; idempotent on the event ID |
 | Compute | Who can exec, push code or change config, and what can the role do? | 🪟 window, Shell, deploy or code-change access | Exec off in production; only CI/CD pushes; secrets in a secret manager; least-privilege role |
 | Identity provider | Self sign-up, or attributes users can write themselves? | 🪟 window, Function-level authorization (a user grants themselves a role) | Roles only from admin-managed groups; app client can't write role attributes |
-| Credentials, secrets and keys | New credentials, keys or roles? Where kept, what can each do if it leaks? | 🪟 window, Secret exposure — or cover it at the window the secret lives in | Secret manager, never code or env vars; least privilege; rotation |
+| Credentials, secrets and keys | New credentials, keys or roles? Where kept, what can each do if it leaks? | Cover it at the trusted window the secret lives in (the compute that holds it); a window of its own only when none holds it | Secret manager, never code or env vars; least privilege; rotation |
 | Third-party and SaaS | What data do we share; which tokens does it hold into us? | 🪟 window, Unnecessary data sharing, Secret exposure | Only the fields it needs; narrowest scopes |
 | Caches | Cached data that needs authorization? | 🪟 window, Cache authorization bypass | Cache key includes the user or tenant; no CDN caching of authenticated responses |
-| Logs and monitoring | What data goes into logs? | 🪟 window, PII or credentials in logs | No tokens, secrets, signed URLs or full PII; redaction in the logger |
-| Logs and monitoring | Will people need to know later who exported data or changed money or permissions? | Repudiation, on the door where the action happens | Audit log entry (who, what, when, which record) the actor can't edit |
+| Logs and monitoring | What data goes into logs? | PII or credentials in logs, in the platform group | No tokens, secrets, signed URLs or full PII; redaction in the logger |
+| Logs and monitoring | Will people need to know later who exported data or changed money or permissions? | One Repudiation threat, linked to every door with such an action | Audit log entry (who, what, when, which record) the actor can't edit |
 | Exported files | Do files we export get used later by a person or another system? | 🪟 window, Edited or injected file | Whatever reads it treats it as untrusted; decisions come from the system |
-| Repo, CI/CD, IaC | Does the work change pipelines, deploy roles or infrastructure code? | 🪟 window, Shell, deploy or code-change access | Protected branches; deploy role only from the pipeline; short-lived OIDC credentials |
-| Other services | Any other service that stores customer data, or another entry point? | 🪟 window and its common misconfigurations | — |
+| Repo, CI/CD, IaC | Does the work change pipelines, deploy roles or infrastructure code? | Shell, deploy or code-change access, in the platform group | Protected branches; deploy role only from the pipeline; short-lived OIDC credentials |
+| Other services | Any other service that stores customer data, or another entry point? | A 🪟 window if a story trusts it, otherwise the platform group; its common misconfigurations | — |
 
 ## Step 2 · 🕳️ Holes
 
-Trace every hole back to the door its input enters through (`Source door`),
+Trace every hole back to every door its input enters through (`Source door`),
 including through stored data and queues.
 
 | Section | Question | If yes, add | Starting mitigation |

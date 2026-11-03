@@ -50,24 +50,31 @@ report shows what the method finds from the code alone.
 ### threat-model
 
 Threat models a design doc, a feature description or a repository with the
-Doors, Windows & Holes method: stories as numbered sequence diagrams, then the
+Doors, Windows & Holes method: the problem and the stories as numbered
+sequence diagrams, then the template's scope questions, which find the
 **doors** (entry points), **windows** (hidden entry points found by
 de-abstracting each component, SaaS integrations included) and **holes**
 (dangerous sinks). Doors, windows and holes that would get the same threats
 and mitigations are **grouped**, so the model stays short enough to read in
 one meeting. Each group gets its business-logic or source-to-sink threats as
-who / what / impact plus a mitigation, and every mitigation gets a
-point-in-time and/or continuous test.
+what / who / impact, linked to shared mitigations, and every mitigation gets a
+point-in-time or continuous test.
+
+By default it runs in four stages and stops for your review after each:
+stories, doors/windows/holes, threats and mitigations, tests. Ask for "one
+shot" to run it straight through.
 
 ```
 /appsec-skills:threat-model docs/design/checkout.md
 /appsec-skills:threat-model .                     # the current repository
+/appsec-skills:threat-model docs/design/checkout.md, one shot
 /appsec-skills:threat-model the new reminders feature, against threat-model/threat-model.json
 ```
 
 It writes `threat-model.md` and `threat-model.json`, and can fill a copy of
-the Notion threat model template (stories, doors/windows/holes, threats and
-testing plan databases) through the Notion connector.
+the Notion threat model template (page text and question callouts, then the
+doors/windows/holes, threats, mitigations and testing plan databases) through
+the Notion connector.
 
 ### code-walkthrough
 

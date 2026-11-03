@@ -5,6 +5,7 @@
 | **Mode** | design |
 | **Date** | 2026-11-02 |
 | **Source** | `docs/checkout-design.md` v3 |
+| **Stage** | complete |
 | **Counts** | 2 stories · 5 groups (2 door, 1 window, 2 hole) · 4 threats · 4 mitigations · 6 tests |
 
 ## Summary
@@ -66,6 +67,7 @@ sequenceDiagram
 | Resource ID? | ✅ T2 |
 | Mutating, with session cookies? | ⛔ Bearer token in a header, no cookies |
 | Webhooks from a third party? | ✅ Added D2 (covered in the full model) |
+| Redirect to a location from the URL? | ➖ Not in scope: the design shows no redirects |
 
 **🪟 Windows** · Queues: SQS `order-paid`
 
@@ -109,7 +111,7 @@ business logic comes before source to sink.
 
 | | Threat (What) | Who | Impact | Category | Mitigations | Status | Severity |
 |---|---|---|---|---|---|---|---|
-| T1 | Missing AuthN: calls `POST /api/orders` without a valid token | Unauthenticated user | Orders on other users' accounts | 🔓 Business logic | M1 | ❓ | High |
+| T1 | Missing AuthN: calls the API with no valid bearer token (also at D2) | Unauthenticated user | Orders on other users' accounts | 🔓 Business logic | M1 | ❓ | High |
 | T2 | IDOR: changes the order ID in `GET /api/orders/:id` | Any signed-in attendee | Reads other attendees' names, emails and amounts | 🔓 Business logic | M2 | ❓ | High |
 
 Library: T1 [Broken authentication](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/broken-authentication/) · T2 [Broken object-level authorization](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/broken-object-level-authorization/)
@@ -126,7 +128,7 @@ Library: T3 [Windows: queues, topics and event buses](https://mohamed-osama-aboe
 
 | | Threat (What) | Who | Impact | Category | Mitigations | Status | Severity |
 |---|---|---|---|---|---|---|---|
-| T4 | SQL injection through order input (D1 `items[].ticketTypeId` → `ticketTypeStore.reserve`) | Any signed-in attendee | Reads or changes the whole database | 💉 Source to sink | M4 | ❓ | Critical |
+| T4 | SQL injection through order input (source: D1 `items[].ticketTypeId` → `ticketTypeStore.reserve`) | Any signed-in attendee | Reads or changes the whole database | 💉 Source to sink | M4 | ❓ | Critical |
 
 Library: T4 [SQL injection](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/source-to-sink/sql-injection/)
 
