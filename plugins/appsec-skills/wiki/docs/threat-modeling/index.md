@@ -49,22 +49,39 @@ README, the router, the infrastructure code and the UI. Name each story (`S1`,
 `S2`…) so later steps can point at "S3 · step 4". Add the log line each step
 writes: it answers "would we know if this happened?".
 
-Then build the **scope** from the stories. Everything a story touches is in
-scope; anything the scope needs that no story touches means a story is missing.
+Then write the **general scope**: what isn't a door, window or hole but decides
+how bad a threat is.
 
-- What problem does it solve, and for whom? Who are the users and roles
-  (anonymous, signed-in, owner, admin, staff, other tenants, third parties)?
-- Which new and changed routes, pages, scheduled or event-driven workflows,
-  infrastructure and third-party services do the stories use?
-- What data do they handle (PII, payments, secrets, private content), and
-  which credentials do they introduce or use?
-- Which components do they run on, and which services do they call?
+- What problem does it solve, and for whom?
+- Who are the users and roles (anonymous, signed-in, owner, admin, staff,
+  support, third parties), and does it serve several organizations?
+- What data does it handle (PII, payments, secrets, private content), and
+  what other assets matter (money, capacity, the brand's emails)?
+
+Everything else the stories touch (routes, pages, webhooks, buckets, queues,
+compute, identity, secrets, third parties, data stores, renderers, outbound
+calls, AI, new libraries) is scope too, and step 2 sorts it into doors, windows
+and holes.
 
 ## Step 2: Doors, windows and holes
 
 Walk each story step by step and mark where input gets in (doors), what each box
 really is and who else can reach it (windows), and where input can do damage
 (holes). Record, for each one, the stories and steps it appears in.
+
+Ask the questions in this order, so each answer adds the door, window or hole
+and its threats together:
+
+- 🚪 **Doors**: new or changed backend routes, public API routes, sign-in and
+  recovery, webhooks, links and codes we hand out. For each: does it need
+  AuthN, which roles may call it, does it take a resource ID, which fields can
+  the caller set or see, cookies, prices, workflow steps, limited things?
+- 🪟 **Windows**: buckets, queues and schedulers, compute, the identity
+  provider, credentials, third parties, caches, logs, exported files, CI/CD.
+  For each: who else can reach it, write to it or read from it?
+- 🕳️ **Holes**: data stores, what pages render, templates, PDFs, CSV and email,
+  file paths and commands, outbound requests, AI prompts, new libraries. For
+  each: does user input reach it, and through which function?
 
 ### Group them
 

@@ -35,12 +35,12 @@ sequenceDiagram
     Note over API: INFO order.paid order_id=… tickets=2
 ```
 
-## 2. Scope
+## 2. General scope
 
 - **Goal:** attendees buy tickets through Stripe Checkout.
 - **Users and roles:** anonymous visitors, signed-in attendees, Stripe (webhook).
-- **In scope:** `POST /api/orders`, `GET /api/orders/:id`, `POST /api/webhooks/stripe`, SQS `order-paid`.
-- **Data and credentials:** attendee names and emails; Stripe secret key, webhook secret.
+- **Data:** attendee names and emails (PII); payment status. Card data stays on Stripe.
+- **Other assets:** ticket revenue, seat capacity.
 - **Assumptions:** the API uses a bearer token in the `Authorization` header, not cookies.
 
 ## 3. Doors, windows and holes
