@@ -111,8 +111,10 @@ business logic comes before source to sink.
 
 | | Threat (What) | Who | Impact | Category | Mitigations | Status | Severity |
 |---|---|---|---|---|---|---|---|
-| T1 | Missing AuthN: calls the API with no valid bearer token (also at D2) | Unauthenticated user | Orders on other users' accounts | 🔓 Business logic | M1 | ❓ | High |
+| T1 | Missing AuthN: calls the API with a token that shouldn't work (also at D2) | Unauthenticated user, or a user whose session should have ended | Orders on other users' accounts | 🔓 Business logic | M1, M5 | ❓ | High |
 | T2 | IDOR: changes the order ID in `GET /api/orders/:id` | Any signed-in attendee | Reads other attendees' names, emails and amounts | 🔓 Business logic | M2 | ❓ | High |
+
+Covers (T1): no or forged token · expired token · session still valid after sign-out
 
 Library: T1 [Broken authentication](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/broken-authentication/) · T2 [Broken object-level authorization](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/broken-object-level-authorization/)
 
@@ -140,6 +142,7 @@ Library: T4 [SQL injection](https://mohamed-osama-aboelkheir.github.io/appsec-un
 | M2 | Load the order scoped to `user_id = caller`; same 404 for missing and not yours | Access control check | T2 | ❓ Needs verification | Assumption |
 | M3 | Queue policy allows only the API task role; the worker re-checks `orders.status = 'paid'` | Platform / cloud config | T3 | ❌ Missing | design §4 shows no queue policy |
 | M4 | Parameterized queries only, no raw fragments | Safe function | T4 | ❓ Needs verification | Assumption |
+| M5 | Sign-out revokes the refresh token; sessions have a maximum lifetime | Access control check | T1 | ❓ Needs verification | Assumption |
 
 ## 6. Testing plan
 
@@ -151,6 +154,7 @@ Library: T4 [SQL injection](https://mohamed-osama-aboelkheir.github.io/appsec-un
 | Q4 | Queue policy denies other roles | M3 | ⏱️ Point-in-time | Config review | `SendMessage` as another role is denied | Before release |
 | Q5 | Queue policy in IaC | M3 | 🔁 Continuous | Policy-as-code / IaC check | Fails if the policy allows more than the API role | IaC pipeline |
 | Q6 | No string-built SQL | M4 | 🔁 Continuous | SAST rule | Fails the build on raw or concatenated SQL | Semgrep in CI |
+| Q7 | Signed-out session is refused | M5 | 🔁 Continuous | Integration test | Sign out, then reuse the old refresh and access tokens: expect 401 | API integration suite in CI |
 
 ## 7. Assumptions and open questions
 

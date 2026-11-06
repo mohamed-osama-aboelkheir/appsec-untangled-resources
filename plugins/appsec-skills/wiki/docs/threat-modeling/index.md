@@ -134,6 +134,25 @@ Every threat has:
   ❓ Needs verification · Risk accepted. In a design, most start as ❓.
 - **Severity**.
 
+### Merge threats that are one attack
+
+Threats that come from the same wiki page and ask the same question about the
+same thing are one threat, even when the design shows them in different
+places. The usual cases:
+
+- **AuthN**: one threat per token or session the system trusts, covering every
+  way it can be wrong (forged, expired, from another tenant, still valid after
+  deactivation, stolen, left signed in on a shared device).
+- **A window**: reads and writes under the same bucket, queue or key policy.
+- **Repudiation**: missing log entries and editable ones, for the same kind of
+  action.
+
+A merge must not lose anything. Every control stays its own mitigation with
+its own test, the merged threat lists each attack it covers, links every
+door, window and hole, and takes the highest severity. Don't merge across
+library threats, into an outlier you split out on purpose, or when one variant
+is two severity levels above the others: keep that one on its own.
+
 ## Step 4: Testing plan
 
 Every mitigation gets a test that would fail if the mitigation were missing.

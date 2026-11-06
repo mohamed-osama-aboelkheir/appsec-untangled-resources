@@ -198,6 +198,49 @@ same control at several doors or windows (AuthN, an audit log, a rate limit),
 write it once and link it to all of them (`groups`). In the Markdown, list
 it under the most sensitive of them, and add "also at …".
 
+**Merge threats that are one attack.** Once every group has its threats, and
+before the budget check, merge two or more threats into one when all of
+these hold:
+
+1. They come from the same library threat (wiki page or heading) and have
+   the same category.
+2. They ask the same question about the same thing: the same token or
+   session the system trusts (AuthN), the same resource under the same
+   policy (a window), the same kind of action that must be on record
+   (repudiation), or the same sink through the same function (a hole).
+3. A team would discuss them together: closing one and not the others leaves
+   the question open.
+
+The usual merges:
+
+- **AuthN**: every way the trusted token or session can be wrong is one
+  threat for that mechanism: forged, expired, from another tenant's issuer,
+  still valid after the user is deactivated, never expiring, stolen, or left
+  signed in on a shared device.
+- **A window's readers and writers**: unauthorized reads and unauthorized
+  writes or deletes under one bucket, queue or key policy.
+- **Repudiation**: actions that leave no entry, and entries the actor can
+  edit or delete, for the same kind of action.
+
+Merging changes how threats are counted, never what the model covers:
+
+- **Keep every mitigation.** Each control stays its own mitigation, with its
+  own tests; the merged threat links to all of them. Merge two mitigations
+  only when one control really does both.
+- **Keep every variant.** List each merged attack in `variants` (the
+  Markdown's *Covers* line, the Notion row's `Notes`), so the title can stay
+  short. Keep each attacker in Who and each outcome in Impact.
+- **Combine, don't pick**: the union of `groups` and `sourceDoors`, the
+  highest severity, and the worst status (worked out from all the merged
+  mitigations).
+- **Don't merge** across categories or library threats, into or out of an
+  outlier split off in step 2 (it was split because it's different), or when
+  the severities are two or more levels apart: keep the severe one on its
+  own, so it isn't hidden.
+
+Say in the stage summary which threats you merged ("4 into 2: AuthN, S3
+bucket"), so the reviewer can ask to split one back out.
+
 Every threat has: a **title** that is the What, **Who**, **Impact**,
 **Category**, the **library threat** (wiki page) it comes from, **Status**,
 **Severity**, and the **mitigations** that stop it.
@@ -216,8 +259,9 @@ token in a header, no cookies").
 **Budget**: about 10 to 25 threats for a feature and 30 to 40 for a whole
 system, with doors and holes taking most of them. If you are over, you have
 not grouped enough: merge groups that share the control, write one threat for
-the same attack at several doors, merge threats on one group that share one
-mitigation, or move windows nothing trusts into the platform group. Never
+the same attack at several doors, merge threats that are one attack (above),
+merge threats on one group that share one mitigation, or move windows nothing
+trusts into the platform group. Never
 drop a high-severity threat to meet the budget.
 
 **Threat status**: ✅ Mitigated **only when a test of its mitigation has
