@@ -94,7 +94,8 @@ each in story order.
 **Threats**
 
 - `Threat`: the title (What)
-- `Who`, `Impact`, `Notes`
+- `Who`, `Impact`, `Notes` (for a merged threat, start with
+  `Covers: <variant> · <variant>` from `variants`)
 - `Door / window / hole`: the page URLs of every group in `groups` (at least
   one; the main view is grouped by it, and a threat with several shows in each)
 - `Source door`: source-to-sink threats only, the doors in `sourceDoors`
@@ -140,6 +141,12 @@ grouping rule, link a new threat to an existing mitigation when the same
 control stops it, and create rows only for what is new. Answer the callouts
 the change touches; leave the others. Never delete or overwrite rows the team
 wrote; put disagreements in `Notes`.
+
+When threats already on the page are merged (in feature mode, or when the user
+asks), update the row that stays: its title, Who, Impact, `Notes`, the union of
+`Door / window / hole`, and every mitigation. Leave the other rows in place
+until the user confirms, then move them to Trash; never delete a mitigation or
+test that was linked to them.
 
 ## 5. Check
 

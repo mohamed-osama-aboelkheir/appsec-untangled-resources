@@ -398,6 +398,13 @@
               "Low"
             ]
           },
+          "variants": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "When several threats were merged into this one: each attack it covers, one short phrase each, so the merge loses nothing"
+          },
           "notes": {
             "type": "string"
           }
