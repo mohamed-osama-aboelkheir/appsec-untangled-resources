@@ -144,7 +144,7 @@ Sets the depth for every later batch.
 - [x] `ssti/ejs.md`
 - [ ] `ssti/handlebars.md`
 - [ ] `ssti/pug.md`
-- [ ] `ssti/nunjucks.md`
+- [x] `ssti/nunjucks.md`
 
 #### Front-end framework (client-side path traversal)
 
