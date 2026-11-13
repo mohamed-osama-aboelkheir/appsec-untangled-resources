@@ -197,12 +197,12 @@ Sets the depth for every later batch.
 
 #### Backend framework: Spring Boot + Spring Security (Java)
 
-- [ ] `broken-authentication/spring.md`
-- [ ] `broken-object-level-authorization/spring.md`
-- [ ] `broken-function-level-authorization/spring.md`
-- [ ] `broken-property-level-authorization/spring.md`
-- [ ] `broken-tenant-isolation/spring.md`
-- [ ] `csrf/spring.md`
+- [x] `broken-authentication/spring.md`
+- [x] `broken-object-level-authorization/spring.md`
+- [x] `broken-function-level-authorization/spring.md`
+- [x] `broken-property-level-authorization/spring.md`
+- [x] `broken-tenant-isolation/spring.md`
+- [x] `csrf/spring.md`
 - [ ] `open-redirect/spring.md`
 - [ ] `file-upload/spring.md`
 
@@ -214,11 +214,12 @@ Sets the depth for every later batch.
 #### View layer (XSS)
 
 - [ ] `xss/thymeleaf.md`
+- [x] `xss/freemarker.md`
 
 #### Template engine (SSTI)
 
 - [ ] `ssti/thymeleaf.md`
-- [ ] `ssti/freemarker.md`
+- [x] `ssti/freemarker.md`
 
 #### Runtime: Java
 
@@ -400,8 +401,7 @@ Add these when a real review needs them, or after Tier 1 is done.
   (Java), `ado-net` (.NET), `doctrine` (PHP), `sequel` (Ruby), `sqlx` (Go).
 - NoSQL libraries: `spring-data-mongodb` (Java), `mongodb-csharp` (.NET),
   `mongo-go` (Go).
-- XSS view layers: `svelte`, `jquery`, `pug`, `nunjucks`, `twig`,
-  `freemarker`, and Markdown renderers `markdown-it`, `marked`.
+- XSS view layers: `svelte`, `jquery`, `pug`, `twig`, and Markdown renderers `markdown-it`, `marked`.
 - SSTI engines: `velocity`, `django-templates`, `razor` (only for
   RazorEngine-style runtime compilation).
 - Client-side path traversal: `svelte`.

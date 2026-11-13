@@ -30,6 +30,10 @@ A lower-privileged user calls the privileged endpoint directly, because the rest
 
     --8<-- "examples/broken-function-level-authorization/express.md"
 
+=== "Spring (Java)"
+
+    --8<-- "examples/broken-function-level-authorization/spring.md"
+
 ## Resources
 
 - [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)

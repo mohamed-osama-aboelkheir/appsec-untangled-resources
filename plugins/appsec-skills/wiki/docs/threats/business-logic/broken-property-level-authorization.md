@@ -25,6 +25,10 @@ The attacker adds fields the UI never sends, such as `"role": "admin"`, `"compan
 
     --8<-- "examples/broken-property-level-authorization/express.md"
 
+=== "Spring (Java)"
+
+    --8<-- "examples/broken-property-level-authorization/spring.md"
+
 ## Resources
 
 - [OWASP Mass Assignment Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html)

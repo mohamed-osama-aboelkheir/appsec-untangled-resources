@@ -144,7 +144,7 @@ Search the changed code, and the code it calls, for sinks that entry-point input
 | SQL | `query(`, `raw(`, `whereRaw`, `knex.raw`, `sequelize.query`, `$queryRaw`, `sql.raw`, template literals with SQL keywords, `ORDER BY` or column names built from input |
 | NoSQL | `find(`, `findOne(`, `update*(`, `aggregate(`, `$where`, filters or updates built from `req.body` or `req.query` |
 | HTML / DOM | HTML strings in `res.send(`, template rendering, `innerHTML`, `dangerouslySetInnerHTML`, `v-html`, `href` or `src` set from data |
-| Template | `ejs.render`, `pug.compile`, `Handlebars.compile`, `_.template`, `nunjucks.renderString` with input inside the template source |
+| Template | `ejs.render`, `pug.compile`, `Handlebars.compile`, `_.template`, `nunjucks.renderString`, FreeMarker `new Template(…, new StringReader(…))` or `?interpret`, Velocity `evaluate` with input inside the template source |
 | Outbound URL | `fetch(`, `axios`, `got`, `http.request`, webhook or callback URLs, URL previews, file-by-URL imports |
 | Redirect | `res.redirect(`, `Location` headers, `window.location` |
 | Client-side request path | template literals building `fetch`/`axios`/XHR URLs from ids, slugs, aliases, handles or filenames; `encodeURI` where `encodeURIComponent` is needed |

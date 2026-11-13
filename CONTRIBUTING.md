@@ -84,8 +84,8 @@ backend, instead of being copied into each framework's file.
 | Authentication, the four authorization threats, CSRF, open redirect | backend framework | `express.md`, `nextjs.md`, `nestjs.md`, `aspnet.md`, `spring.md`, `fastapi.md`, `django.md`, `flask.md`, `laravel.md`, `rails.md`, `gin.md` |
 | SQL injection | database library | `pg.md`, `knex.md`, `prisma.md`, `sqlalchemy.md`, `django-orm.md`, `hibernate.md`, `ef-core.md`, `eloquent.md`, `activerecord.md` |
 | NoSQL injection | database library | `mongoose.md`, `mongodb.md` |
-| XSS | view layer | `ejs.md`, `react.md`, `vue.md`, `angular.md`, `blade.md`, `thymeleaf.md`, `razor.md`, `erb.md`, `jinja2.md` |
-| SSTI | template engine | `ejs.md`, `handlebars.md`, `pug.md`, `jinja2.md`, `thymeleaf.md`, `blade.md` |
+| XSS | view layer | `ejs.md`, `react.md`, `vue.md`, `angular.md`, `blade.md`, `thymeleaf.md`, `razor.md`, `erb.md`, `jinja2.md`, `freemarker.md` |
+| SSTI | template engine | `ejs.md`, `handlebars.md`, `pug.md`, `jinja2.md`, `thymeleaf.md`, `freemarker.md`, `blade.md` |
 | Client-side path traversal | front-end framework | `vanilla-js.md`, `react.md`, `vue.md`, `angular.md` |
 | SSRF, path traversal | language runtime | `node.md`, `python.md`, `java.md`, `dotnet.md`, `php.md`, `ruby.md`, `go.md` |
 

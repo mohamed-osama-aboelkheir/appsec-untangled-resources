@@ -11,6 +11,7 @@ A member of tenant A reaches tenant B's data or actions. Typical ways in:
 - Passing one of B's resource IDs to a route that checks only the caller's role or account type, not the resource's tenant.
 - Switching tenants with a header or parameter that isn't checked against membership.
 - A query, job or cache key that is missing the tenant filter.
+- A query that is scoped to the caller's tenant, but merges caller-supplied filters in after the scope, so a `tenantId` filter in the request replaces it. Allowlists of filterable fields built from the model's columns let the tenant key through.
 - Obtaining a credential or token that acts inside B.
 
 ## Mitigation
@@ -18,6 +19,7 @@ A member of tenant A reaches tenant B's data or actions. Typical ways in:
 - Derive the tenants a caller may act in from their authenticated identity (membership), never from client input alone.
 - On every lookup of a tenant-owned resource, check that the resource's tenant is one the caller belongs to, before reading or acting.
 - Apply the tenant filter centrally (repository or query helper), including keys, tokens, files, jobs and caches.
+- Add the tenant condition last, so caller-supplied filters can't replace it, and allowlist filterable fields explicitly rather than deriving them from the model.
 - Bind issued credentials to the tenant they were created in.
 
 ## Test
@@ -30,6 +32,10 @@ A member of tenant A reaches tenant B's data or actions. Typical ways in:
 === "Express (JS)"
 
     --8<-- "examples/broken-tenant-isolation/express.md"
+
+=== "Spring (Java)"
+
+    --8<-- "examples/broken-tenant-isolation/spring.md"
 
 ## Resources
 

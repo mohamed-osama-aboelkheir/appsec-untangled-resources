@@ -26,6 +26,10 @@ The attacker replaces the ID with one that belongs to someone else, and the serv
 
     --8<-- "examples/broken-object-level-authorization/express.md"
 
+=== "Spring (Java)"
+
+    --8<-- "examples/broken-object-level-authorization/spring.md"
+
 === "Django (Py)"
 
     --8<-- "examples/broken-object-level-authorization/django.md"

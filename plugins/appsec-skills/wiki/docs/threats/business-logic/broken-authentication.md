@@ -30,6 +30,10 @@ The attacker calls the entry point with no credentials, or with expired, forged 
 
     --8<-- "examples/broken-authentication/express.md"
 
+=== "Spring (Java)"
+
+    --8<-- "examples/broken-authentication/spring.md"
+
 ## Resources
 
 - [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)

@@ -3,7 +3,7 @@
 ## When is it relevant
 
 A new or changed code path where user-controlled text becomes part of a template's source, not just its data. Examples:
-- compiling templates from strings with EJS, Pug, Handlebars, Nunjucks or Lodash `_.template`;
+- compiling templates from strings with EJS, Pug, Handlebars, Nunjucks, Lodash `_.template`, FreeMarker (`new Template(name, new StringReader(src), cfg)`) or Velocity;
 - email or notification templates that users can edit;
 - expression engines.
 
@@ -11,7 +11,7 @@ It also applies when request objects are passed whole as render options.
 
 ## Attack
 
-Template syntax in the input runs on the server. In EJS, for example, `<%= process.mainModule.require('child_process').execSync('id') %>` runs a shell command. That can expose secrets and environment variables or give full remote code execution. Passing `req.query` or `req.body` straight into `res.render` can also inject engine options.
+Template syntax in the input runs on the server. In EJS, for example, `<%= process.mainModule.require('child_process').execSync('id') %>` runs a shell command, and in FreeMarker `<#assign ex="freemarker.template.utility.Execute"?new()>${ex("id")}` does the same. That can expose secrets and environment variables or give full remote code execution. Passing `req.query` or `req.body` straight into `res.render` can also inject engine options.
 
 ## Mitigation
 
@@ -33,6 +33,10 @@ Template syntax in the input runs on the server. In EJS, for example, `<%= proce
 === "Nunjucks (JS)"
 
     --8<-- "examples/ssti/nunjucks.md"
+
+=== "FreeMarker (Java)"
+
+    --8<-- "examples/ssti/freemarker.md"
 
 ## Resources
 
