@@ -43,6 +43,25 @@ Mitigation examples live outside the pages, one file per technology:
 ${CLAUDE_PLUGIN_ROOT}/wiki/examples/<threat-file-name>/<stack>.md
 ```
 
+### Linking a threat to its wiki page
+
+The wiki is published at `https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/`, with each page at the same path as
+its file, without `.md`. Every threat card in the report links its wiki page,
+so a reader can open the checklist and the code for their stack:
+
+```
+https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/<category>/<threat-file-name>/?stack=<stack>#examples
+```
+
+- `<stack>` is the **example file name** you read for this threat (`flask`,
+  `pymongo`, `jinja2`, `python`, `express`, `pg`, …), so the page opens on that
+  tab. Give two, comma-separated, when the profile genuinely has two
+  (`?stack=ejs,react`); the first one that exists opens.
+- When the stack has no example file, link the page without `?stack=` or
+  `#examples`, and say in the card that no example exists for that stack.
+- For a threat with no wiki page (a sink type in step 3 that no page covers),
+  write `**Wiki:** no page yet` instead of a link.
+
 Each example file carries, for that stack: **Mitigation options** (the accepted
 ways to implement the control, with documentation links), a **Vulnerable** and a
 **Mitigated** example per option, **Bypasses to check**, and **What to grep for**.
@@ -103,8 +122,9 @@ Use the parts as follows:
    - Most repositories have several, and that is expected: an Express API using Prisma, EJS views and a Vue front end is four entries. Different threats are answered by different ones, so keep the whole profile.
 3. Find the relevant code outside the diff: authentication and permission middleware, how the request context is built, data-access helpers, and tenant or membership helpers.
 4. Write the **stories**. For each main flow the change adds or alters, draw a Mermaid `sequenceDiagram` from the actor through the network, backend and database. Show the controls along the way: authentication, permission checks, validation. Explain each story in a short paragraph.
+   - A change usually has one to four stories (for example "add an item to the cart" and "check out"). Number them **Story 1**, **Story 2**, …, each under its own `### Story N: <what happens>` heading with an `<a id="story-N"></a>` anchor, its own diagram, and its own `#### Controls in this flow`. Don't merge unrelated flows into one diagram, and don't drop a story because the report is long.
    - Name participants with their lane first, as in `participant R as Backend<br/>routes/tasks.js` or `participant D as Database`. The HTML renderer uses that to place them in swim lanes.
-5. Collect the **controls in this flow**: for the diagram's security-relevant steps — the authentication gate, each authorization check, and the write or render at the end — note the file, the line range and the few lines that matter. These go under the diagram in the report, each labelled with its step, so a reader can follow the flow straight into the code.
+5. Collect the **controls in this flow** for each story: for the diagram's security-relevant steps — the authentication gate, each authorization check, and the write or render at the end — note the file, the line range and the few lines that matter. These go under that story's diagram in the report, each labelled with its step number **in that diagram**, so a reader can follow the flow straight into the code.
 
 ## Step 2: Entry points
 
@@ -127,7 +147,10 @@ Write a one-line summary table of all of them, then a block per entry point with
 | **Action sensitivity** | Read or write, one record or many, reversible or not, financial, destructive, or with side effects such as email | Severity |
 | **Authentication** | Which middleware enforces it, or none | Authentication threats |
 | **Authorization model** | Every dimension this app uses to decide access: tenant or organization, group or team, role, permission, the caller's relation to the resource (owner, member, assignee, follower), object state (draft, published, archived), feature flags and plan limits. Say which ones apply here and which the app doesn't have | All four authorization threats |
+| **Stories** | Which stories, and which steps of them, this entry point appears in: `Story 1, steps 2–11`. Write `none` if no story covers it, and consider whether one should | Connecting the entry point to the flow it belongs to |
 | **Location** | `path:line` with a link | Evidence |
+
+Add a **Stories** column to the summary table too, linking each story (`[Story 1](#story-1)`).
 
 Then write **Who should be able to do this** as a short list of ✅ and ❌ conditions, in business terms, covering: the intended caller; other authenticated users; other tenants or groups; higher-privilege roles; anonymous callers; and another origin acting through the victim's browser. These conditions are the yardstick for the business-logic threats in step 5 — a threat is a case where the code allows something this list marks ❌, or blocks something it marks ✅.
 
@@ -149,7 +172,11 @@ Search the changed code, and the code it calls, for sinks that entry-point input
 | Redirect | `res.redirect(`, `Location` headers, `window.location` |
 | Client-side request path | template literals building `fetch`/`axios`/XHR URLs from ids, slugs, aliases, handles or filenames; `encodeURI` where `encodeURIComponent` is needed |
 | File path | `fs.*`, `path.join` or `path.resolve` with input, `res.sendFile`, `res.download`, archive extraction |
-| Other | `exec` / `spawn`, `eval` / `new Function`, deserialization, regexes built from input. Record these even if no wiki page covers them yet |
+| OS command and its arguments | `exec`, `spawn`, `execFile`, `subprocess`, `ProcessBuilder`, `Process.Start`, `exec.Command`, `system`, backticks; wrappers around `git`, `tar`, `ssh`, `rsync`, `curl`, `ffmpeg`, ImageMagick. An argument array is still a sink: any value from input that could start with `-` is an option injection candidate |
+| Deserialization | `pickle`, `yaml.load`, `jsonpickle`, `ObjectInputStream`, Jackson default typing, `BinaryFormatter`, Json.NET `TypeNameHandling`, `unserialize`, `phar://`, `Marshal.load`, `node-serialize`; cookies, caches and queues that hold objects |
+| Other | `eval` / `new Function`, XML parsers (XXE), regexes built from input. Record these even if no wiki page covers them yet |
+
+For each sink, also record which **stories** (and steps) reach it, as a **Stories** column in the sinks table. A sink that no story reaches is a hint that a story is missing.
 
 Record the sink types you searched for and didn't find, so coverage is explicit.
 
@@ -171,6 +198,7 @@ For each threat in the model, read its full wiki page and the one example file f
 3. **Look for the control elsewhere before marking ❌.** It may be router-level middleware, a service-layer check or a database constraint. Mark ❓ if you can't tell.
 4. **Set the status:** ✅ Mitigated · ⚠️ Partially mitigated · ❌ Not mitigated · ❓ Needs verification. For anything not fully mitigated, set a severity (Critical, High, Medium or Low) from who can trigger it and what they gain.
 5. **Write it up as one card per threat**, so everything about a threat is in one place:
+   - the wiki link on the **Category** line (see "Linking a threat to its wiki page");
    - a short justification;
    - the code snippet with line numbers and a link;
    - for anything not fully mitigated, **Exploitability** and **Suggested fix** (below);

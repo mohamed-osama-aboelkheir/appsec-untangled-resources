@@ -116,7 +116,7 @@ business logic comes before source to sink.
 
 Covers (T1): no or forged token · expired token · session still valid after sign-out
 
-Library: T1 [Broken authentication](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/broken-authentication/) · T2 [Broken object-level authorization](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/broken-object-level-authorization/)
+Library: T1 [Broken authentication](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/broken-authentication/?stack=express#examples) · T2 [Broken object-level authorization](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/broken-object-level-authorization/?stack=express#examples)
 
 ### 🪟 W1: SQS `order-paid`
 
@@ -132,7 +132,7 @@ Library: T3 [Windows: queues, topics and event buses](https://mohamed-osama-aboe
 |---|---|---|---|---|---|---|---|
 | T4 | SQL injection through order input (source: D1 `items[].ticketTypeId` → `ticketTypeStore.reserve`) | Any signed-in attendee | Reads or changes the whole database | 💉 Source to sink | M4 | ❓ | Critical |
 
-Library: T4 [SQL injection](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/source-to-sink/sql-injection/)
+Library: T4 [SQL injection](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/source-to-sink/sql-injection/?stack=pg#examples)
 
 ## 5. Mitigations
 

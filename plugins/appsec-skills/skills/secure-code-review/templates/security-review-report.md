@@ -1,7 +1,7 @@
 <!--
 Security review report template (Markdown).
 Follows the threat-model-first methodology, in the same order as the talk:
-  1 Scope and story → 2 Entry points → 3 Dangerous sinks → 4 Threat model
+  1 Scope and stories → 2 Entry points → 3 Dangerous sinks → 4 Threat model
   → 5 Mitigation analysis (exploitability + fix live inside each threat card)
   → 6 Action items
 Filled in with the dummy "edit task description" PR from the slides.
@@ -56,7 +56,9 @@ Users can currently add and complete tasks but not change their text. This PR ad
 **Tech stack:** Node.js with Express and `express-session`, PostgreSQL through `pg`, plain JavaScript in the browser.
 **Roles:** the task owner (logged in), other logged-in users, anonymous visitors.
 
-### The story: what happens when a user clicks Edit
+<a id="story-1"></a>
+
+### Story 1: what happens when a user clicks Edit
 
 Each step says what happens; the code it happens in is attached to the step.
 
@@ -83,7 +85,7 @@ sequenceDiagram
   B->>B: Replaces the text shown on the page
 ```
 
-### Controls in this flow
+#### Controls in this flow
 
 **Step 1 — the button that starts it** (`U->>B` in the diagram)
 
@@ -175,6 +177,50 @@ Content-Type: application/json
 
 🔗 [`public/tasks.js#L33`](https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L33)
 
+<a id="story-2"></a>
+
+### Story 2: what the task list shows after a reload
+
+The list is unchanged by this PR, but it renders the description the new route saves, so it is part of the change's story.
+
+```mermaid
+sequenceDiagram
+  actor U as User
+  participant B as Browser<br/>public/tasks.js
+  participant R as Backend<br/>routes/tasks.js
+  participant D as PostgreSQL
+
+  U->>B: Reloads the task list
+  B->>R: Asks for the user's tasks, with the session cookie attached
+  R->>D: Reads only the tasks this user owns
+  R-->>B: Returns the tasks as JSON
+  B->>B: Writes each description into the list as text
+```
+
+#### Controls in this flow
+
+**Step 3 — the scoped read** (`R->>D` in the diagram)
+
+```js
+// routes/tasks.js (unchanged by this PR)
+12  router.get('/', async (req, res) => {
+13    const { rows } = await db.query(
+14      'SELECT * FROM tasks WHERE owner_id = $1', [req.session.userId])
+15    res.json(rows)
+16  })
+```
+
+🔗 [`routes/tasks.js#L12-L16`](https://github.com/example-org/todo-app/blob/9f3c2ab/routes/tasks.js#L12-L16)
+
+**Step 5 — how it reaches the page** (`B->>B` in the diagram)
+
+```js
+// public/tasks.js (unchanged by this PR)
+8    li.textContent = task.description
+```
+
+🔗 [`public/tasks.js#L8`](https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L8)
+
 ### Assumptions and out of scope
 
 - No CORS middleware is configured, so the API accepts only same-origin browser requests.
@@ -184,9 +230,9 @@ Content-Type: application/json
 
 ## 2. 🚪 Entry points
 
-| # | Entry point | Authentication | Action performed | Sensitivity | Location |
-|---|---|---|---|---|---|
-| EP1 | `PUT /api/tasks/:id` | Session cookie | Rewrites one task's description | Medium — private user content, single record, reversible | [`routes/tasks.js#L31`](https://github.com/example-org/todo-app/blob/9f3c2ab/routes/tasks.js#L31) |
+| # | Entry point | Authentication | Action performed | Sensitivity | Stories | Location |
+|---|---|---|---|---|---|---|
+| EP1 | `PUT /api/tasks/:id` | Session cookie | Rewrites one task's description | Medium — private user content, single record, reversible | [Story 1](#story-1) | [`routes/tasks.js#L31`](https://github.com/example-org/todo-app/blob/9f3c2ab/routes/tasks.js#L31) |
 
 ### EP1 · `PUT /api/tasks/:id`
 
@@ -199,6 +245,7 @@ Content-Type: application/json
 | **Action sensitivity** | Write to a single record, reversible by the owner. Not financial, not destructive, no side effects outside the row |
 | **Authentication** | Session cookie, enforced by `requireAuth` on the router mount |
 | **Authorization model** | Per-record ownership: `tasks.owner_id` must equal the session user. This app has no tenants, organizations, groups, roles, permissions or feature flags — ownership is the only dimension |
+| **Stories** | [Story 1](#story-1), steps 2–11 |
 | **Location** | [`routes/tasks.js#L31-L39`](https://github.com/example-org/todo-app/blob/9f3c2ab/routes/tasks.js#L31-L39) |
 
 **Who should be able to do this**
@@ -215,10 +262,10 @@ The Edit button and `prompt()` in the browser collect the description, but the s
 
 ## 3. 🎯 Dangerous sinks
 
-| # | Sink | Type | Reached by | Location |
-|---|---|---|---|---|
-| SK1 | `db.query(UPDATE …)` | SQL query | `description`, `id` | [`store/taskStore.js#L19-L22`](https://github.com/example-org/todo-app/blob/9f3c2ab/store/taskStore.js#L19-L22) |
-| SK2 | `.textContent = …` | Page update (DOM) | `description` (from the response) | [`public/tasks.js#L33`](https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L33) |
+| # | Sink | Type | Reached by | Stories | Location |
+|---|---|---|---|---|---|
+| SK1 | `db.query(UPDATE …)` | SQL query | `description`, `id` | [Story 1](#story-1) step 9 | [`store/taskStore.js#L19-L22`](https://github.com/example-org/todo-app/blob/9f3c2ab/store/taskStore.js#L19-L22) |
+| SK2 | `.textContent = …` | Page update (DOM) | `description` (from the response) | [Story 1](#story-1) step 12, [Story 2](#story-2) step 5 | [`public/tasks.js#L33`](https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L33), [`#L8`](https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L8) |
 
 ---
 
@@ -247,7 +294,7 @@ The Edit button and `prompt()` in the browser collect the description, but the s
 
 ### T1 · Missing authentication · ✅ Mitigated
 
-**Category:** 🔓 Business logic · **Entry point:** EP1
+**Category:** 🔓 Business logic · **Entry point:** EP1 · **Wiki:** [Broken authentication](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/broken-authentication/?stack=express#examples)
 
 **Justification:** All `/api/tasks` routes are mounted behind `requireAuth`, which returns `401` when there's no session, so the new route can't be reached anonymously.
 
@@ -293,7 +340,7 @@ HTTP/1.1 401 Unauthorized
 
 ### T2 · Missing authorization (IDOR) · ✅ Mitigated
 
-**Category:** 🔓 Business logic · **Entry point:** EP1
+**Category:** 🔓 Business logic · **Entry point:** EP1 · **Wiki:** [Broken object-level authorization](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/broken-object-level-authorization/?stack=express#examples)
 
 **Justification:** The handler loads the task and returns `404` unless its `owner_id` matches the logged-in user, before calling `store.update()`.
 
@@ -347,7 +394,7 @@ Task 42's description is unchanged in the database.
 
 ### T3 · Missing CSRF protection · ⚠️ Partially mitigated · Severity: Low
 
-**Category:** 🔓 Business logic · **Entry point:** EP1
+**Category:** 🔓 Business logic · **Entry point:** EP1 · **Wiki:** [CSRF](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/csrf/?stack=express#examples)
 
 **Justification:** There's no CSRF token and the session cookie has no `SameSite` attribute. Cross-site requests are blocked today only because a `PUT` with a JSON body triggers a CORS preflight that the server doesn't approve. That protection disappears if the route ever accepts `POST` or form bodies, or if CORS is enabled with credentials.
 
@@ -399,7 +446,7 @@ Set the cookie attributes so the browser never sends the session cookie cross-si
 
 ### T4 · Cross-site scripting (XSS) · ✅ Mitigated
 
-**Category:** 💉 Source to sink · **Sink:** SK2
+**Category:** 💉 Source to sink · **Sink:** SK2 · **Wiki:** [XSS](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/source-to-sink/xss/) (no example for `vanilla-js` yet)
 
 **Justification:** The description from the response is written with `.textContent`, so the browser shows it as text and never parses it as HTML.
 
@@ -432,7 +479,7 @@ Set the cookie attributes so the browser never sends the session cookie cross-si
 
 ### T5 · SQL injection · ✅ Mitigated
 
-**Category:** 💉 Source to sink · **Sink:** SK1
+**Category:** 💉 Source to sink · **Sink:** SK1 · **Wiki:** [SQL injection](https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/source-to-sink/sql-injection/?stack=pg#examples)
 
 **Justification:** `description` and `id` are passed to PostgreSQL as parameters (`$1`, `$2`), never concatenated into the SQL text.
 

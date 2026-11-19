@@ -54,6 +54,12 @@ change introduces or feeds.
 - [**Open redirect**](source-to-sink/open-redirect.md) — sink: redirect location
   Can input send the user to another site?
 
+- [**Command injection (including argument injection)**](source-to-sink/command-injection.md) — sink: OS command or its arguments
+  Can input run a command, or add an option that makes a tool run one?
+
+- [**Insecure deserialization**](source-to-sink/insecure-deserialization.md) — sink: a decoder that builds typed objects
+  Can input choose which objects get built, and so run code while it is decoded?
+
 ## How to use a page
 
 Read **When is it relevant** first and rule the threat in or out. If it applies,

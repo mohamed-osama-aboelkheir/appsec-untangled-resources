@@ -38,6 +38,10 @@ The attacker replaces the ID with one that belongs to someone else, and the serv
 
     --8<-- "examples/broken-object-level-authorization/rails.md"
 
+=== "Flask (Py)"
+
+    --8<-- "examples/broken-object-level-authorization/flask.md"
+
 ## Resources
 
 - [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)

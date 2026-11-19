@@ -315,8 +315,16 @@ far; in one-shot mode, once at the end.
    `${CLAUDE_PLUGIN_ROOT}/skills/threat-model/templates/threat-model.md`. The
    template is a shortened dummy example: keep its structure, replace the
    content, and write every group, threat, mitigation and test, not an
-   excerpt. Link each threat to the wiki page or heading it came from; for a
-   sink with no page, link the `holes.md` sink catalogue.
+   excerpt. Link each threat to the wiki page or heading it came from, on the
+   published site (`https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/<path>/`); for a
+   sink with no page, link the `holes.md` sink catalogue. When the stack is
+   known (code mode, or a design that names it) and the page has an example
+   for it, add `?stack=<example file name>#examples` so the link opens on the
+   code for that stack, for example
+   `threats/source-to-sink/command-injection/?stack=python#examples`. Check the
+   example exists (`wiki/examples/<threat>/<stack>.md`) before adding it; the
+   `secure-code-review` skill's "Linking a threat to its wiki page" has the
+   rules.
 2. `<output>/threat-model.json`, matching
    `${CLAUDE_PLUGIN_ROOT}/skills/threat-model/references/threat-model.schema.json`.
    It is what feature mode reads next time and what step 6 pushes to Notion.

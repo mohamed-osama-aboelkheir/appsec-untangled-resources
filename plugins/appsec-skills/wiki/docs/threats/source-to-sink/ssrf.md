@@ -32,6 +32,10 @@ Bypasses include redirects, DNS rebinding, and alternative IP encodings such as 
 
     --8<-- "examples/ssrf/node.md"
 
+=== "Python (Py)"
+
+    --8<-- "examples/ssrf/python.md"
+
 ## Resources
 
 - [OWASP SSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html)
