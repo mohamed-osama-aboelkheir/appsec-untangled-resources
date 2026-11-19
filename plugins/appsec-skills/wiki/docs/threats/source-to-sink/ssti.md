@@ -38,6 +38,10 @@ Template syntax in the input runs on the server. In EJS, for example, `<%= proce
 
     --8<-- "examples/ssti/freemarker.md"
 
+=== "Jinja2 (Py)"
+
+    --8<-- "examples/ssti/jinja2.md"
+
 ## Resources
 
 - [OWASP Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Injection_Prevention_Cheat_Sheet.html)

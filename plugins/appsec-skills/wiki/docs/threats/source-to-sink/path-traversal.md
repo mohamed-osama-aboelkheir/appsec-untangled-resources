@@ -25,6 +25,10 @@ The attacker uses `../` sequences to reach files outside the intended folder. Va
 
     --8<-- "examples/path-traversal/node.md"
 
+=== "Python (Py)"
+
+    --8<-- "examples/path-traversal/python.md"
+
 ## Resources
 
 - [OWASP Input Validation Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)

@@ -29,6 +29,10 @@ Express parses `?password[$ne]=x` and JSON bodies into objects. A filter like `{
 
     --8<-- "examples/nosql-injection/mongoose.md"
 
+=== "PyMongo (Py)"
+
+    --8<-- "examples/nosql-injection/pymongo.md"
+
 ## Resources
 
 - [OWASP NoSQL Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/NoSQL_Security_Cheat_Sheet.html)

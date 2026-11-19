@@ -7,6 +7,7 @@ on:
       - "zensical.toml"
       - "plugins/appsec-skills/skills/secure-code-review/templates/**"
       - ".github/workflows/wiki-site.yml"
+      - ".github/scripts/**"
   workflow_dispatch:
 permissions:
   contents: read
@@ -28,6 +29,8 @@ jobs:
       # The example report on the site is the skill's own template, copied in so
       # the two can never drift apart.
       - run: cp plugins/appsec-skills/skills/secure-code-review/templates/security-review-report.html plugins/appsec-skills/wiki/docs/example-report.html
+      # Every example tab must open from a ?stack=<file name> link (used by the skills).
+      - run: node .github/scripts/check-stack-tabs.mjs
       - run: zensical build --clean
       - uses: actions/upload-pages-artifact@v5
         with:

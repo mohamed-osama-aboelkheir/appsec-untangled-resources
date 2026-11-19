@@ -20,8 +20,8 @@ value were hostile?"
 | HTML → PDF or image renderer | Tickets, invoices, reports rendered by a headless browser or a PDF library | [SSRF](../threats/source-to-sink/ssrf.md), [XSS](../threats/source-to-sink/xss.md) |
 | CSV and spreadsheets | Exports opened in Excel or Sheets, or imported by another tool | — |
 | Email body and headers | Subject lines, display names, HTML emails built from user text | — |
-| OS command | `exec`, `spawn`, image or video tools, shelling out to CLIs | — |
-| Deserialization | Pickle, Java serialization, YAML loaders, `eval`, `new Function` | — |
+| OS command | `exec`, `spawn`, image or video tools, wrappers around `git`, `tar`, `ssh` or `ffmpeg`, values saved now and passed to a command later | [Command injection](../threats/source-to-sink/command-injection.md) |
+| Deserialization | Pickle, Java serialization, `BinaryFormatter`, PHP `unserialize`, Ruby `Marshal`, YAML loaders, cookies or cache entries that hold objects | [Insecure deserialization](../threats/source-to-sink/insecure-deserialization.md) |
 | XML | XML or SVG uploads, SAML, office documents | — |
 | Token and document parsers | JWT libraries, QR or barcode decoders, file-format parsers: the parser itself mis-handles crafted input | — |
 | Logs | Names, queries and headers written to logs (fake lines, secrets in logs) | — |
@@ -48,7 +48,9 @@ Input that travels through queues, files or the database is still user input.
    from database IDs, fixed redirect URLs, sort columns from an allowlist.
 2. **A safe function.** Parameterized queries, auto-escaping templates, a
    logic-less template engine, a structured email API instead of raw MIME, a
-   CSV library, `execFile` with an argument array.
+   CSV library, `execFile` with an argument array. An argument array stops
+   shell injection but not options: a value that starts with `-` still needs
+   validation or a `--` before it (see [command injection](../threats/source-to-sink/command-injection.md)).
 3. **Validation or sanitization.** An allowlist of characters or values, an
    HTML sanitizer, URL scheme and destination checks, stripping line breaks.
 

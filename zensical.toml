@@ -4,6 +4,7 @@ site_description = "An application security wiki for developers, from the AppSec
 docs_dir = "plugins/appsec-skills/wiki/docs"
 site_dir = "site"
 extra_css = ["assets/brand.css"]
+extra_javascript = ["assets/stack-tabs.js"]
 
 [project.theme]
 name = "material"

@@ -75,7 +75,7 @@ including through stored data and queues.
 | Files, templates, emails, exports | Users write templates the server renders? | 🕳️ hole, SSTI | Safe function: logic-less engine, fixed placeholders |
 | Files, templates, emails, exports | User text rendered into PDFs or images? | 🕳️ hole, HTML → PDF injection | Safe function: auto-escaping; renderer with JS, network and file access off; patched |
 | Files, templates, emails, exports | User text in CSV exports or emails? | 🕳️ hole, CSV injection, Email injection | Safe function: CSV library, neutralise leading `= + - @`; structured email API, no line breaks in headers |
-| Files, templates, emails, exports | Paths or keys from input, shell commands, deserialization, XML? | 🕳️ hole per sink, matching threat | Keys from database IDs; `execFile` with an argument array; safe loaders |
+| Files, templates, emails, exports | Paths or keys from input, shell commands, deserialization, XML? | 🕳️ hole per sink, matching threat | Keys from database IDs; `execFile` with an argument array, values that can't start with `-` and a `--` before them; JSON or safe loaders instead of native deserialization |
 | Outbound requests | Server fetches a URL the user controls? | 🕳️ hole, SSRF | Validation: allowlist, or block private and metadata ranges; no redirects |
 | AI services | User input in prompts whose output acts or reaches a sink? | 🕳️ hole, Prompt injection | Treat output as untrusted; tools no stronger than the user; a person confirms changes |
 | New libraries | New libraries handling user input? | 🕳️ hole, Dependency vulnerabilities — or cover it in the mitigation of the hole it serves | Dependency scanning in CI; patch within an agreed time |

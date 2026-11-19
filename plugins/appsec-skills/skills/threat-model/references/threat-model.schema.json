@@ -358,7 +358,7 @@
           },
           "libraryThreat": {
             "type": "string",
-            "description": "Wiki page, for example threats/business-logic/broken-object-level-authorization or threat-modeling/business-rules#race-conditions"
+            "description": "Wiki page, for example threats/business-logic/broken-object-level-authorization or threat-modeling/business-rules#race-conditions. Links built from it may add ?stack=<example file name>#examples to open the example for the project's stack"
           },
           "title": {
             "type": "string",
