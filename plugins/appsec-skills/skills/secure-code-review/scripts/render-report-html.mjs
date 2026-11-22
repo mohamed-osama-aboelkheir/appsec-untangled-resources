@@ -125,34 +125,77 @@ const renderCode = (lang, lines) => {
 
 // Mermaid sequenceDiagram → swim lanes.
 // Controls in this flow: "**Step N — label**" + a code fence + an optional 🔗 link.
-// These are lifted out of section 1 and rendered inside the matching swim-lane step.
-const controls = new Map();
-{
-  const block = md.match(/### Controls in this flow\n([\s\S]*?)(?=\n### )/);
-  if (block) {
-    const ls = block[1].split('\n');
-    let cur = null;
-    for (let i = 0; i < ls.length; i += 1) {
-      const line = ls[i];
-      let m;
-      if ((m = line.match(/^\*\*Step (\d+)\s*[—-]\s*(.+?)\*\*(?:\s*\(`([^`]+)`)?/))) {
-        cur = { label: m[2], arrow: m[3] ?? '', code: '', link: '', step: Number(m[1]) };
-        controls.set(cur.step, cur);
-      } else if (cur && line.startsWith('```')) {
-        const lang = line.slice(3).trim();
-        const body = [];
-        i += 1;
-        while (i < ls.length && !ls[i].startsWith('```')) body.push(ls[i++]);
-        cur.code = renderCode(lang, body);
-      } else if (cur && line.startsWith('🔗')) {
-        const lm = line.match(/\[([^\]]+)\]\(([^)]+)\)/);
-        if (lm) cur.link = `<a class="code-link" href="${lm[2]}">🔗 ${inline(lm[1])}</a>`;
-      }
+// A report can have several stories, each with its own diagram followed by its own
+// "### Controls in this flow" (or "#### …") block. Each block belongs to the diagram
+// just before it; its controls are lifted out and rendered inside that diagram's steps.
+const parseControls = (ls) => {
+  const controls = new Map();
+  let cur = null;
+  for (let i = 0; i < ls.length; i += 1) {
+    const line = ls[i];
+    let m;
+    if ((m = line.match(/^\*\*Step (\d+)\s*[—-]\s*(.+?)\*\*(?:\s*\(`([^`]+)`)?/))) {
+      cur = { label: m[2], arrow: m[3] ?? '', code: '', link: '', step: Number(m[1]) };
+      controls.set(cur.step, cur);
+    } else if (cur && line.startsWith('```')) {
+      const lang = line.slice(3).trim();
+      const body = [];
+      i += 1;
+      while (i < ls.length && !ls[i].startsWith('```')) body.push(ls[i++]);
+      cur.code = renderCode(lang, body);
+    } else if (cur && line.startsWith('🔗')) {
+      const lm = line.match(/\[([^\]]+)\]\(([^)]+)\)/);
+      if (lm) cur.link = `<a class="code-link" href="${lm[2]}">🔗 ${inline(lm[1])}</a>`;
     }
+  }
+  return controls;
+};
+
+const controlSets = []; // controlSets[d] = the controls of diagram d (0-based, in document order)
+const dropped = new Set(); // line numbers of the controls blocks, left out of the document walk
+{
+  const ls = md.split('\n');
+  let diagram = -1;
+  let fence = false;
+  for (let i = 0; i < ls.length; i += 1) {
+    const line = ls[i];
+    if (line.startsWith('```')) {
+      if (!fence && line.slice(3).trim() === 'mermaid') diagram += 1;
+      fence = !fence;
+      continue;
+    }
+    const head = !fence && line.match(/^(#{3,4}) Controls in this flow\s*$/);
+    if (!head) continue;
+    // The block runs to the next heading of the same or a higher level, outside code fences.
+    const level = head[1].length;
+    const body = [];
+    let inner = false;
+    let j = i + 1;
+    for (; j < ls.length; j += 1) {
+      const l = ls[j];
+      if (l.startsWith('```')) inner = !inner;
+      const h = !inner && l.match(/^(#{1,6}) /);
+      if (h && h[1].length <= level) break;
+      if (!inner && /^<a id="[^"]+"><\/a>\s*$/.test(l) && /^#{1,6} /.test(ls[j + 2] ?? '')) break;
+      body.push(l);
+    }
+    for (let k = i; k < j; k += 1) dropped.add(k);
+    if (diagram < 0) {
+      console.warn(`warning: "Controls in this flow" at line ${i + 1} comes before any diagram; it was ignored.`);
+    } else {
+      const merged = controlSets[diagram] ?? new Map();
+      for (const [step, c] of parseControls(body)) merged.set(step, c);
+      controlSets[diagram] = merged;
+    }
+    i = j - 1;
   }
 }
 
+let diagramIndex = -1;
 const renderLanes = (lines) => {
+  diagramIndex += 1;
+  const controls = controlSets[diagramIndex] ?? new Map();
+  const story = `diagram ${diagramIndex + 1}`;
   const participants = {};
   const laneOf = (label) => {
     const l = label.toLowerCase();
@@ -209,7 +252,7 @@ const renderLanes = (lines) => {
         const hint = control.arrow.match(/^(\w+)\s*-?->>\s*(\w+)/);
         if (hint && (hint[1] !== r.from || hint[2] !== r.to)) {
           console.warn(
-            `warning: "Step ${n} — ${control.label}" says \`${control.arrow}\` but step ${n} of the diagram is ` +
+            `warning (${story}): "Step ${n} — ${control.label}" says \`${control.arrow}\` but step ${n} of the diagram is ` +
             `\`${r.from}->>${r.to}\`. Count only the message lines to number a control.`,
           );
         }
@@ -222,9 +265,9 @@ const renderLanes = (lines) => {
     })
     .join('\n');
   for (const [step, c] of controls) {
-    if (!c.seen) console.warn(`warning: "Step ${step} — ${c.label}" has no matching step in the diagram (it has ${n} steps).`);
+    if (!c.seen) console.warn(`warning (${story}): "Step ${step} — ${c.label}" has no matching step in the diagram (it has ${n} steps).`);
   }
-  return `<div class="table-wrap"><div class="lanes" role="table" aria-label="Request flow">${heads}\n${body}\n</div></div>`;
+  return `<div class="table-wrap"><div class="lanes" role="table" aria-label="Request flow, ${story}">${heads}\n${body}\n</div></div>`;
 };
 
 // ---------------------------------------------------------------------------
@@ -250,7 +293,7 @@ const closeSection = () => {
   inSection = false;
 };
 
-const lines = md.replace(/### Controls in this flow\n[\s\S]*?(?=\n### )/, '').split('\n');
+const lines = md.split('\n').filter((_, k) => !dropped.has(k));
 for (let i = 0; i < lines.length; i++) {
   const line = lines[i];
 
@@ -326,7 +369,11 @@ for (let i = 0; i < lines.length; i++) {
 
   if (line.startsWith('### ')) {
     closeArticle();
-    out.push(`<h3${pendingAnchor ? ` id="${pendingAnchor}"` : ''}>${badgeStatuses(inline(line.slice(4)))}</h3>`);
+    const title = line.slice(4);
+    const storyNo = title.match(/^Story (\d+)\b/)?.[1];
+    const id = pendingAnchor ?? (storyNo ? `story-${storyNo}` : null);
+    if (storyNo) toc.push({ id, label: title.replace(/`/g, ''), sub: true });
+    out.push(`<h3${id ? ` id="${id}"` : ''}>${badgeStatuses(inline(title))}</h3>`);
     pendingAnchor = null;
     continue;
   }

@@ -12,3 +12,5 @@ Untrusted input reaching a dangerous sink, checked at every sink.
 | [Open redirect](open-redirect.md) | Redirect location |
 | [Path traversal](path-traversal.md) | File system path |
 | [Client-side path traversal (CSPT)](client-side-path-traversal.md) | Client-side request path |
+| [Command injection (including argument injection)](command-injection.md) | OS command or its arguments |
+| [Insecure deserialization](insecure-deserialization.md) | Decoder that builds typed objects |

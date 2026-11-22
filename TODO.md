@@ -68,8 +68,8 @@ with every stack added.
       or the default name.
 - [ ] New threat pages (When is it relevant / Attack / Mitigation /
       Examples / Resources), plus their sink rows in SKILL.md step 3:
-  - [ ] `threats/source-to-sink/command-injection.md`
-  - [ ] `threats/source-to-sink/insecure-deserialization.md`
+  - [x] `threats/source-to-sink/command-injection.md`
+  - [x] `threats/source-to-sink/insecure-deserialization.md`
   - [ ] `threats/source-to-sink/xxe.md`
   - [ ] `threats/source-to-sink/prototype-pollution.md`
   - [ ] `threats/business-logic/file-upload.md`
@@ -157,8 +157,8 @@ Sets the depth for every later batch.
 
 - [x] `path-traversal/node.md`
 - [x] `ssrf/node.md`
-- [ ] `command-injection/node.md`
-- [ ] `insecure-deserialization/node.md`
+- [x] `command-injection/node.md`
+- [x] `insecure-deserialization/node.md`
 - [ ] `xxe/node.md`
 - [ ] `prototype-pollution/node.md`
 - [ ] `prototype-pollution/vanilla-js.md`
@@ -189,8 +189,8 @@ Sets the depth for every later batch.
 
 - [ ] `path-traversal/dotnet.md`
 - [ ] `ssrf/dotnet.md`
-- [ ] `command-injection/dotnet.md`
-- [ ] `insecure-deserialization/dotnet.md`
+- [x] `command-injection/dotnet.md`
+- [x] `insecure-deserialization/dotnet.md`
 - [ ] `xxe/dotnet.md`
 
 ### Batch 3: Java
@@ -225,8 +225,8 @@ Sets the depth for every later batch.
 
 - [ ] `path-traversal/java.md`
 - [ ] `ssrf/java.md`
-- [ ] `command-injection/java.md`
-- [ ] `insecure-deserialization/java.md`
+- [x] `command-injection/java.md`
+- [x] `insecure-deserialization/java.md`
 - [ ] `xxe/java.md`
 
 ### Batch 4: Python
@@ -255,36 +255,36 @@ Sets the depth for every later batch.
 
 #### Backend framework: Flask (Py)
 
-- [ ] `broken-authentication/flask.md`
-- [ ] `broken-object-level-authorization/flask.md`
-- [ ] `broken-function-level-authorization/flask.md`
-- [ ] `broken-property-level-authorization/flask.md`
-- [ ] `broken-tenant-isolation/flask.md`
-- [ ] `csrf/flask.md`
-- [ ] `open-redirect/flask.md`
+- [x] `broken-authentication/flask.md`
+- [x] `broken-object-level-authorization/flask.md`
+- [x] `broken-function-level-authorization/flask.md`
+- [x] `broken-property-level-authorization/flask.md`
+- [x] `broken-tenant-isolation/flask.md`
+- [x] `csrf/flask.md`
+- [x] `open-redirect/flask.md`
 - [ ] `file-upload/flask.md`
 
 #### Database library
 
 - [ ] `sql-injection/sqlalchemy.md`
 - [ ] `sql-injection/django-orm.md`
-- [ ] `nosql-injection/pymongo.md`
+- [x] `nosql-injection/pymongo.md`
 
 #### View layer (XSS)
 
-- [ ] `xss/jinja2.md`
+- [x] `xss/jinja2.md`
 - [ ] `xss/django-templates.md`
 
 #### Template engine (SSTI)
 
-- [ ] `ssti/jinja2.md`
+- [x] `ssti/jinja2.md`
 
 #### Runtime: Python
 
-- [ ] `path-traversal/python.md`
-- [ ] `ssrf/python.md`
-- [ ] `command-injection/python.md`
-- [ ] `insecure-deserialization/python.md`
+- [x] `path-traversal/python.md`
+- [x] `ssrf/python.md`
+- [x] `command-injection/python.md`
+- [x] `insecure-deserialization/python.md`
 - [ ] `xxe/python.md`
 
 ### Batch 5: PHP
@@ -318,8 +318,8 @@ Sets the depth for every later batch.
 
 - [ ] `path-traversal/php.md`
 - [ ] `ssrf/php.md`
-- [ ] `command-injection/php.md`
-- [ ] `insecure-deserialization/php.md`
+- [x] `command-injection/php.md`
+- [x] `insecure-deserialization/php.md`
 - [ ] `xxe/php.md`
 
 ### Batch 6: Ruby
@@ -351,8 +351,8 @@ Sets the depth for every later batch.
 
 - [ ] `path-traversal/ruby.md`
 - [ ] `ssrf/ruby.md`
-- [ ] `command-injection/ruby.md`
-- [ ] `insecure-deserialization/ruby.md`
+- [x] `command-injection/ruby.md`
+- [x] `insecure-deserialization/ruby.md`
 - [ ] `xxe/ruby.md`
 
 ### Batch 7: Go
@@ -385,8 +385,8 @@ Sets the depth for every later batch.
 
 - [ ] `path-traversal/go.md`
 - [ ] `ssrf/go.md`
-- [ ] `command-injection/go.md`
-- [ ] `insecure-deserialization/go.md`
+- [x] `command-injection/go.md`
+- [x] `insecure-deserialization/go.md`
 - [ ] `xxe/go.md`
 
 ### Batch 8: Tier 2

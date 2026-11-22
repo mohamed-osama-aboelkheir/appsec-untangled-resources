@@ -37,6 +37,10 @@ A member of tenant A reaches tenant B's data or actions. Typical ways in:
 
     --8<-- "examples/broken-tenant-isolation/spring.md"
 
+=== "Flask (Py)"
+
+    --8<-- "examples/broken-tenant-isolation/flask.md"
+
 ## Resources
 
 - [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)

@@ -30,6 +30,10 @@ A page on another site makes the victim's browser send the request, and the brow
 
     --8<-- "examples/csrf/spring.md"
 
+=== "Flask (Py)"
+
+    --8<-- "examples/csrf/flask.md"
+
 ## Resources
 
 - [OWASP CSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html)

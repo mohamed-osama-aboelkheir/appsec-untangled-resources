@@ -25,6 +25,10 @@ The attacker sends a link on your trusted domain that bounces the victim to a ph
 
     --8<-- "examples/open-redirect/express.md"
 
+=== "Flask (Py)"
+
+    --8<-- "examples/open-redirect/flask.md"
+
 ## Resources
 
 - [OWASP Unvalidated Redirects and Forwards Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html)

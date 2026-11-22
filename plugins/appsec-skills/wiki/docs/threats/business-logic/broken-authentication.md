@@ -34,6 +34,10 @@ The attacker calls the entry point with no credentials, or with expired, forged 
 
     --8<-- "examples/broken-authentication/spring.md"
 
+=== "Flask (Py)"
+
+    --8<-- "examples/broken-authentication/flask.md"
+
 ## Resources
 
 - [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)

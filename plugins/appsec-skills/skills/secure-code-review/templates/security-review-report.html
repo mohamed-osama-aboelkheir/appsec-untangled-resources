@@ -274,6 +274,8 @@
 <nav class="toc" aria-label="Report sections"><div class="toc-title">Security review</div><ol>
 <li><a href="#summary">Summary</a></li>
 <li><a href="#scope">1. Scope and architecture</a></li>
+<li class="sub"><a href="#story-1">Story 1: what happens when a user clicks…</a></li>
+<li class="sub"><a href="#story-2">Story 2: what the task list shows after …</a></li>
 <li><a href="#entry-points">2. Entry points</a></li>
 <li><a href="#sinks">3. Dangerous sinks</a></li>
 <li><a href="#threat-model">4. Threat model</a></li>
@@ -316,9 +318,9 @@
 <p><b>Relevant code outside the diff:</b> <a href="https://github.com/example-org/todo-app/blob/9f3c2ab/app.js#L1-L11"><code>app.js</code></a>, where sessions and <code>requireAuth</code> are set up, and <code>store.get()</code>.</p>
 <p><b>Tech stack:</b> Node.js with Express and <code>express-session</code>, PostgreSQL through <code>pg</code>, plain JavaScript in the browser.</p>
 <p><b>Roles:</b> the task owner (logged in), other logged-in users, anonymous visitors.</p>
-<h3>The story: what happens when a user clicks Edit</h3>
+<h3 id="story-1">Story 1: what happens when a user clicks Edit</h3>
 <p>Each step says what happens; the code it happens in is attached to the step.</p>
-<div class="table-wrap"><div class="lanes" role="table" aria-label="Request flow"><div class="lane-head"></div><div class="lane-head browser">🖥️ Browser / client</div><div class="lane-head network">🌐 Network</div><div class="lane-head backend">⚙️ Backend</div><div class="lane-head db">🗄️ Database</div>
+<div class="table-wrap"><div class="lanes" role="table" aria-label="Request flow, diagram 1"><div class="lane-head"></div><div class="lane-head browser">🖥️ Browser / client</div><div class="lane-head network">🌐 Network</div><div class="lane-head backend">⚙️ Backend</div><div class="lane-head db">🗄️ Database</div>
 <div class="num">1</div><div class="cell browser"><div class="step">Clicks Edit and types a new description<small>Browser · public/tasks.js</small></div><div class="lane-code"><pre class="code" data-lang="html"><span class="file">public/index.html</span><span class="l"><span class="n">13</span>&lt;button onclick="editTask(42)"&gt;Edit&lt;/button&gt;</span></pre><a class="code-link" href="https://github.com/example-org/todo-app/blob/9f3c2ab/public/index.html#L13">🔗 <code>public/index.html#L13</code></a></div></div><div class="cell network"></div><div class="cell backend"></div><div class="cell db"></div>
 <div class="num">2</div><div class="cell browser"></div><div class="cell network"><div class="step">Sends the update request, with the session cookie attached<small>Browser · public/tasks.js → Backend · app.js</small></div><div class="lane-code"><pre class="code" data-lang="http"><span class="file">HTTP request</span><span class="l">PUT /api/tasks/42 HTTP/1.1</span><span class="l">Host: todo.example.com</span><span class="l">Cookie: connect.sid=s%3AkF9x...</span><span class="l">Content-Type: application/json</span><span class="l"> </span><span class="l">{"description": "Buy oat milk"}</span></pre></div></div><div class="cell backend"></div><div class="cell db"></div>
 <div class="num">3</div><div class="cell browser"></div><div class="cell network"></div><div class="cell backend"><div class="step">Refuses the request unless the session identifies a user<small>Backend · app.js</small></div><div class="lane-code"><pre class="code" data-lang="js"><span class="file">app.js</span><span class="l"><span class="n">5</span>function requireAuth(req, res, next) {</span><span class="l"><span class="n">6</span>  if (!req.session.userId) return res.sendStatus(401)</span><span class="l"><span class="n">7</span>  next()</span><span class="l"><span class="n">8</span>}</span><span class="l"><span class="n">11</span>app.use('/api/tasks', requireAuth, tasksRouter)</span></pre><a class="code-link" href="https://github.com/example-org/todo-app/blob/9f3c2ab/app.js#L5-L11">🔗 <code>app.js#L5-L11</code></a></div></div><div class="cell db"></div>
@@ -332,12 +334,21 @@
 <div class="num">11</div><div class="cell browser"></div><div class="cell network"><div class="step">Returns the updated task as JSON<small>Backend · routes/tasks.js → Browser · public/tasks.js</small></div><div class="lane-code"><pre class="code" data-lang="http"><span class="file">HTTP response</span><span class="l">HTTP/1.1 200 OK</span><span class="l">Content-Type: application/json</span><span class="l"> </span><span class="l">{"id": 42, "owner_id": 7, "description": "Buy oat milk"}</span></pre></div></div><div class="cell backend"></div><div class="cell db"></div>
 <div class="num">12</div><div class="cell browser"><div class="step">Replaces the text shown on the page<small>Browser · public/tasks.js</small></div><div class="lane-code"><pre class="code" data-lang="js"><span class="file">public/tasks.js</span><span class="l"><span class="n">33</span>  document.getElementById(`desc-${id}`).textContent = task.description</span></pre><a class="code-link" href="https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L33">🔗 <code>public/tasks.js#L33</code></a></div></div><div class="cell network"></div><div class="cell backend"></div><div class="cell db"></div>
 </div></div>
+<h3 id="story-2">Story 2: what the task list shows after a reload</h3>
+<p>The list is unchanged by this PR, but it renders the description the new route saves, so it is part of the change's story.</p>
+<div class="table-wrap"><div class="lanes" role="table" aria-label="Request flow, diagram 2"><div class="lane-head"></div><div class="lane-head browser">🖥️ Browser / client</div><div class="lane-head network">🌐 Network</div><div class="lane-head backend">⚙️ Backend</div><div class="lane-head db">🗄️ Database</div>
+<div class="num">1</div><div class="cell browser"><div class="step">Reloads the task list<small>Browser · public/tasks.js</small></div></div><div class="cell network"></div><div class="cell backend"></div><div class="cell db"></div>
+<div class="num">2</div><div class="cell browser"></div><div class="cell network"><div class="step">Asks for the user's tasks, with the session cookie attached<small>Browser · public/tasks.js → Backend · routes/tasks.js</small></div></div><div class="cell backend"></div><div class="cell db"></div>
+<div class="num">3</div><div class="cell browser"></div><div class="cell network"></div><div class="cell backend"></div><div class="cell db"><div class="step">Reads only the tasks this user owns<small>PostgreSQL</small></div><div class="lane-code"><pre class="code" data-lang="js"><span class="file">routes/tasks.js (unchanged by this PR)</span><span class="l"><span class="n">12</span>router.get('/', async (req, res) =&gt; {</span><span class="l"><span class="n">13</span>  const { rows } = await db.query(</span><span class="l"><span class="n">14</span>    'SELECT * FROM tasks WHERE owner_id = $1', [req.session.userId])</span><span class="l"><span class="n">15</span>  res.json(rows)</span><span class="l"><span class="n">16</span>})</span></pre><a class="code-link" href="https://github.com/example-org/todo-app/blob/9f3c2ab/routes/tasks.js#L12-L16">🔗 <code>routes/tasks.js#L12-L16</code></a></div></div>
+<div class="num">4</div><div class="cell browser"></div><div class="cell network"><div class="step">Returns the tasks as JSON<small>Backend · routes/tasks.js → Browser · public/tasks.js</small></div></div><div class="cell backend"></div><div class="cell db"></div>
+<div class="num">5</div><div class="cell browser"><div class="step">Writes each description into the list as text<small>Browser · public/tasks.js</small></div><div class="lane-code"><pre class="code" data-lang="js"><span class="file">public/tasks.js (unchanged by this PR)</span><span class="l"><span class="n">8</span>  li.textContent = task.description</span></pre><a class="code-link" href="https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L8">🔗 <code>public/tasks.js#L8</code></a></div></div><div class="cell network"></div><div class="cell backend"></div><div class="cell db"></div>
+</div></div>
 <h3>Assumptions and out of scope</h3>
 <ul><li>No CORS middleware is configured, so the API accepts only same-origin browser requests.</li><li>Creating, completing and deleting tasks are unchanged and out of scope.</li></ul>
 </section>
 <section id="entry-points"><h2>2. 🚪 Entry points</h2>
-<div class="table-wrap"><table><thead><tr><th>#</th><th>Entry point</th><th>Authentication</th><th>Action performed</th><th>Sensitivity</th><th>Location</th></tr></thead><tbody>
-<tr><td>EP1</td><td><code>PUT /api/tasks/:id</code></td><td>Session cookie</td><td>Rewrites one task's description</td><td>Medium — private user content, single record, reversible</td><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/routes/tasks.js#L31"><code>routes/tasks.js#L31</code></a></td></tr>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Entry point</th><th>Authentication</th><th>Action performed</th><th>Sensitivity</th><th>Stories</th><th>Location</th></tr></thead><tbody>
+<tr><td>EP1</td><td><code>PUT /api/tasks/:id</code></td><td>Session cookie</td><td>Rewrites one task's description</td><td>Medium — private user content, single record, reversible</td><td><a href="#story-1">Story 1</a></td><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/routes/tasks.js#L31"><code>routes/tasks.js#L31</code></a></td></tr>
 </tbody></table></div>
 <h3>EP1 · <code>PUT /api/tasks/:id</code></h3>
 <div class="table-wrap"><table><thead><tr><th></th><th></th></tr></thead><tbody>
@@ -348,6 +359,7 @@
 <tr><td><b>Action sensitivity</b></td><td>Write to a single record, reversible by the owner. Not financial, not destructive, no side effects outside the row</td></tr>
 <tr><td><b>Authentication</b></td><td>Session cookie, enforced by <code>requireAuth</code> on the router mount</td></tr>
 <tr><td><b>Authorization model</b></td><td>Per-record ownership: <code>tasks.owner_id</code> must equal the session user. This app has no tenants, organizations, groups, roles, permissions or feature flags — ownership is the only dimension</td></tr>
+<tr><td><b>Stories</b></td><td><a href="#story-1">Story 1</a>, steps 2–11</td></tr>
 <tr><td><b>Location</b></td><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/routes/tasks.js#L31-L39"><code>routes/tasks.js#L31-L39</code></a></td></tr>
 </tbody></table></div>
 <p><b>Who should be able to do this</b></p>
@@ -355,9 +367,9 @@
 <p>The Edit button and <code>prompt()</code> in the browser collect the description, but the server can't trust them: any client can call EP1 directly.</p>
 </section>
 <section id="sinks"><h2>3. 🎯 Dangerous sinks</h2>
-<div class="table-wrap"><table><thead><tr><th>#</th><th>Sink</th><th>Type</th><th>Reached by</th><th>Location</th></tr></thead><tbody>
-<tr><td>SK1</td><td><code>db.query(UPDATE …)</code></td><td>SQL query</td><td><code>description</code>, <code>id</code></td><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/store/taskStore.js#L19-L22"><code>store/taskStore.js#L19-L22</code></a></td></tr>
-<tr><td>SK2</td><td><code>.textContent = …</code></td><td>Page update (DOM)</td><td><code>description</code> (from the response)</td><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L33"><code>public/tasks.js#L33</code></a></td></tr>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Sink</th><th>Type</th><th>Reached by</th><th>Stories</th><th>Location</th></tr></thead><tbody>
+<tr><td>SK1</td><td><code>db.query(UPDATE …)</code></td><td>SQL query</td><td><code>description</code>, <code>id</code></td><td><a href="#story-1">Story 1</a> step 9</td><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/store/taskStore.js#L19-L22"><code>store/taskStore.js#L19-L22</code></a></td></tr>
+<tr><td>SK2</td><td><code>.textContent = …</code></td><td>Page update (DOM)</td><td><code>description</code> (from the response)</td><td><a href="#story-1">Story 1</a> step 12, <a href="#story-2">Story 2</a> step 5</td><td><a href="https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L33"><code>public/tasks.js#L33</code></a>, <a href="https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L8"><code>#L8</code></a></td></tr>
 </tbody></table></div>
 </section>
 <section id="threat-model"><h2>4. 🧩 Threat model</h2>
@@ -375,7 +387,7 @@
 </section>
 <section id="mitigations"><h2>5. 🔍 Mitigation analysis</h2>
 <article class="threat ok" id="t1"><div class="threat-head"><h3>T1 · Missing authentication</h3><span class="badge ok">✅ Mitigated</span></div>
-<p class="where"><b>Category:</b> <span class="badge logic">🔓 Business logic</span> · <b>Entry point:</b> EP1</p>
+<p class="where"><b>Category:</b> <span class="badge logic">🔓 Business logic</span> · <b>Entry point:</b> EP1 · <b>Wiki:</b> <a href="https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/broken-authentication/?stack=express#examples">Broken authentication</a></p>
 <p class="justification"><b>Justification</b><br />All <code>/api/tasks</code> routes are mounted behind <code>requireAuth</code>, which returns <code>401</code> when there's no session, so the new route can't be reached anonymously.</p>
 <pre class="code" data-lang="js"><span class="file">app.js (unchanged by this PR)</span><span class="l"><span class="n">5</span>function requireAuth(req, res, next) {</span><span class="l"><span class="n">6</span>  if (!req.session.userId) {</span><span class="l"><span class="n">7</span>    return res.sendStatus(401)</span><span class="l"><span class="n">8</span>  }</span><span class="l"><span class="n">9</span>  next()</span><span class="l"><span class="n">10</span>}</span><span class="l"><span class="n">11</span>app.use('/api/tasks', requireAuth, tasksRouter)</span></pre>
 <p class="source-link">🔗 <a href="https://github.com/example-org/todo-app/blob/9f3c2ab/app.js#L5-L11"><code>app.js#L5-L11</code></a></p>
@@ -390,7 +402,7 @@
 </div></details>
 </article>
 <article class="threat ok" id="t2"><div class="threat-head"><h3>T2 · Missing authorization (IDOR)</h3><span class="badge ok">✅ Mitigated</span></div>
-<p class="where"><b>Category:</b> <span class="badge logic">🔓 Business logic</span> · <b>Entry point:</b> EP1</p>
+<p class="where"><b>Category:</b> <span class="badge logic">🔓 Business logic</span> · <b>Entry point:</b> EP1 · <b>Wiki:</b> <a href="https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/broken-object-level-authorization/?stack=express#examples">Broken object-level authorization</a></p>
 <p class="justification"><b>Justification</b><br />The handler loads the task and returns <code>404</code> unless its <code>owner_id</code> matches the logged-in user, before calling <code>store.update()</code>.</p>
 <pre class="code" data-lang="js"><span class="file">routes/tasks.js</span><span class="l"><span class="n">31</span>router.put('/:id', async (req, res) =&gt; {</span><span class="l"><span class="n">32</span>  const task = await store.get(req.params.id)</span><span class="l"><span class="n">33</span>  if (task?.owner_id !== req.session.userId) {</span><span class="l"><span class="n">34</span>    return res.sendStatus(404)</span><span class="l"><span class="n">35</span>  }</span><span class="l"><span class="n">36</span>  const updated = await store.update(</span><span class="l"><span class="n">37</span>    task.id, req.body.description)</span><span class="l"><span class="n">38</span>  res.json(updated)</span><span class="l"><span class="n">39</span>})</span></pre>
 <p class="source-link">🔗 <a href="https://github.com/example-org/todo-app/blob/9f3c2ab/routes/tasks.js#L31-L39"><code>routes/tasks.js#L31-L39</code></a></p>
@@ -407,7 +419,7 @@
 </div></details>
 </article>
 <article class="threat warn" id="t3"><div class="threat-head"><h3>T3 · Missing CSRF protection</h3><span class="badge warn">⚠️ Partially mitigated</span><span class="badge info">Severity: Low</span></div>
-<p class="where"><b>Category:</b> <span class="badge logic">🔓 Business logic</span> · <b>Entry point:</b> EP1</p>
+<p class="where"><b>Category:</b> <span class="badge logic">🔓 Business logic</span> · <b>Entry point:</b> EP1 · <b>Wiki:</b> <a href="https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/business-logic/csrf/?stack=express#examples">CSRF</a></p>
 <p class="justification"><b>Justification</b><br />There's no CSRF token and the session cookie has no <code>SameSite</code> attribute. Cross-site requests are blocked today only because a <code>PUT</code> with a JSON body triggers a CORS preflight that the server doesn't approve. That protection disappears if the route ever accepts <code>POST</code> or form bodies, or if CORS is enabled with credentials.</p>
 <pre class="code" data-lang="js"><span class="file">app.js (unchanged by this PR)</span><span class="l"><span class="n">4</span>app.use(session({ secret: SECRET }))</span></pre>
 <p class="source-link">🔗 <a href="https://github.com/example-org/todo-app/blob/9f3c2ab/app.js#L4"><code>app.js#L4</code></a></p>
@@ -426,7 +438,7 @@
 </div></details>
 </article>
 <article class="threat ok" id="t4"><div class="threat-head"><h3>T4 · Cross-site scripting (XSS)</h3><span class="badge ok">✅ Mitigated</span></div>
-<p class="where"><b>Category:</b> <span class="badge inject">💉 Source to sink</span> · <b>Sink:</b> SK2</p>
+<p class="where"><b>Category:</b> <span class="badge inject">💉 Source to sink</span> · <b>Sink:</b> SK2 · <b>Wiki:</b> <a href="https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/source-to-sink/xss/">XSS</a> (no example for <code>vanilla-js</code> yet)</p>
 <p class="justification"><b>Justification</b><br />The description from the response is written with <code>.textContent</code>, so the browser shows it as text and never parses it as HTML.</p>
 <pre class="code" data-lang="js"><span class="file">public/tasks.js</span><span class="l"><span class="n">32</span>  const task = await res.json()</span><span class="l"><span class="n">33</span>  document.getElementById(`desc-${id}`).textContent = task.description</span></pre>
 <p class="source-link">🔗 <a href="https://github.com/example-org/todo-app/blob/9f3c2ab/public/tasks.js#L32-L33"><code>public/tasks.js#L32-L33</code></a></p>
@@ -440,7 +452,7 @@
 </div></details>
 </article>
 <article class="threat ok" id="t5"><div class="threat-head"><h3>T5 · SQL injection</h3><span class="badge ok">✅ Mitigated</span></div>
-<p class="where"><b>Category:</b> <span class="badge inject">💉 Source to sink</span> · <b>Sink:</b> SK1</p>
+<p class="where"><b>Category:</b> <span class="badge inject">💉 Source to sink</span> · <b>Sink:</b> SK1 · <b>Wiki:</b> <a href="https://mohamed-osama-aboelkheir.github.io/appsec-untangled-resources/threats/source-to-sink/sql-injection/?stack=pg#examples">SQL injection</a></p>
 <p class="justification"><b>Justification</b><br /><code>description</code> and <code>id</code> are passed to PostgreSQL as parameters (<code>$1</code>, <code>$2</code>), never concatenated into the SQL text.</p>
 <pre class="code" data-lang="js"><span class="file">store/taskStore.js</span><span class="l"><span class="n">18</span>async function update(id, description) {</span><span class="l"><span class="n">19</span>  const { rows } = await db.query(</span><span class="l"><span class="n">20</span>    `UPDATE tasks SET description = $1</span><span class="l"><span class="n">21</span>     WHERE id = $2 RETURNING *`,</span><span class="l"><span class="n">22</span>    [description, id])</span><span class="l"><span class="n">23</span>  return rows[0]</span><span class="l"><span class="n">24</span>}</span></pre>
 <p class="source-link">🔗 <a href="https://github.com/example-org/todo-app/blob/9f3c2ab/store/taskStore.js#L18-L24"><code>store/taskStore.js#L18-L24</code></a></p>
@@ -473,6 +485,10 @@
     'as async await break case catch class const continue debugger default delete do else enum export extends finally for from function if implements import in instanceof interface keyof let new of private protected public readonly return satisfies static super switch this throw try type typeof var void while with yield'.split(' ')
   );
   const JS_LITERALS = new Set(['true', 'false', 'null', 'undefined', 'NaN', 'Infinity']);
+  const PY_KEYWORDS = new Set(
+    'and as assert async await break class continue def del elif else except finally for from global if import in is lambda match case nonlocal not or pass raise return try while with yield'.split(' ')
+  );
+  const PY_LITERALS = new Set(['True', 'False', 'None', 'self', 'cls']);
   const SQL_KEYWORDS = new Set(
     'select from where and or not insert into values update set delete join left right inner outer full cross on group by order having limit offset as union all distinct create table alter drop index primary key foreign references default null is in like ilike returning case when then else end exists between asc desc with count sum avg min max'.split(' ')
   );
@@ -496,8 +512,26 @@
     ['n', NUMBER],
   ];
 
+  const pyWord = (text, code, end) => {
+    if (PY_KEYWORDS.has(text)) return 'k';
+    if (PY_LITERALS.has(text)) return 'n';
+    if (/^\s*\(/.test(code.slice(end, end + 12))) return 'f';
+    if (/^[A-Z]/.test(text)) return 't';
+    return null;
+  };
+
+  const PY = [
+    ['c', /#[^\n]*/y],
+    // Triple-quoted strings first, then single-line ones; both with optional r/b/f/u prefixes.
+    ['s', /(?:[rRbBuUfF]{1,2})?(?:'''[\s\S]*?'''|"""[\s\S]*?"""|'(?:\\.|[^\\'\n])*'|"(?:\\.|[^\\"\n])*")/y],
+    ['f', /@[A-Za-z_][\w.]*/y],
+    [pyWord, /[A-Za-z_]\w*/y],
+    ['n', NUMBER],
+  ];
+
   const LANGS = {
     js: JS,
+    py: PY,
     tsx: [JS[0], JS[1], ['t', /<\/?[A-Za-z][\w.]*/y], JS[2], JS[3]],
     bash: [
       ['c', /(?<![^\s])#[^\n]*/y],
@@ -543,6 +577,7 @@
   const ALIASES = {
     js: 'js', ts: 'js', mjs: 'js', cjs: 'js', javascript: 'js', typescript: 'js',
     jsx: 'tsx', tsx: 'tsx',
+    py: 'py', python: 'py', python3: 'py', pyi: 'py', jinja: 'html', j2: 'html',
     bash: 'bash', sh: 'bash', shell: 'bash', zsh: 'bash', console: 'bash',
     http: 'http', json: 'json', sql: 'sql',
     html: 'html', xml: 'html', svg: 'html', vue: 'html',
@@ -554,7 +589,8 @@
     if (hint && ALIASES[hint]) return ALIASES[hint];
     const ext = ((file || '').trim().split(/\s/)[0].match(/\.([a-z0-9]+)$/i) || [])[1];
     if (ext && ALIASES[ext.toLowerCase()]) return ALIASES[ext.toLowerCase()];
-    if (/^\s*(curl|npm|npx|yarn|pnpm|git|node|claude)\b/m.test(code)) return 'bash';
+    if (/^\s*(curl|npm|npx|yarn|pnpm|git|node|claude|pip|python3?)\b/m.test(code)) return 'bash';
+    if (/^\s*(def |class \w+.*:|from \w[\w.]* import |import \w|@\w[\w.]*(\(|$))/m.test(code)) return 'py';
     if (/^(HTTP\/\d|(GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD) \/)/m.test(code)) return 'http';
     if (/^\s*[{[]/.test(code) && /"\s*:/.test(code)) return 'json';
     if (/^\s*<[a-z!]/i.test(code)) return 'html';
