@@ -6,8 +6,8 @@
 # AppSec Untangled Resources
 
 Security code review resources from the
-[AppSec Untangled](https://medium.com/appsec-untangled) blog and YouTube
-channel: an application security wiki, and Claude Code skills that review code
+AppSec Untangled [blog](https://medium.com/appsec-untangled) and [YouTube channel](https://www.youtube.com/@AppSecUntangled):
+an application security wiki, and Claude Code skills that review code
 against it and walk you through how it works.
 
 ## 📖 The wiki
